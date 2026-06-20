@@ -81,6 +81,10 @@ h2 { font-size: clamp(2.4rem, 4.5vw, 4.4rem); }
 .post-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); margin: 70px auto 120px; }
 .post-card { min-height: 315px; background: var(--paper); padding: 32px; display: flex; flex-direction: column; transition: background .2s; }
 .post-card:hover { background: var(--white); }
+.post-card-content { display: flex; flex-direction: column; height: 100%; }
+.post-card:not(.featured) .post-visual { display: none; }
+.post-card.featured .post-category::before { content: "Latest · "; color: var(--rust); }
+.post-visual { display: grid; place-items: center; padding: 15px; background: rgba(169, 189, 165, .12); }
 .post-card.featured { grid-column: span 2; min-height: 360px; display: grid; grid-template-columns: 1fr 1fr; gap: 45px; }
 .post-meta { display: flex; align-items: center; justify-content: space-between; font: .63rem var(--mono); text-transform: uppercase; color: var(--muted); }
 .post-card h2 { font-size: clamp(2rem, 3vw, 3.1rem); margin: 35px 0 15px; }

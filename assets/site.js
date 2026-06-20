@@ -12,7 +12,17 @@ document.querySelectorAll('[data-year]').forEach((el) => {
 });
 
 const filters = document.querySelectorAll('[data-filter]');
-const posts = document.querySelectorAll('[data-category]');
+const posts = document.querySelectorAll('[data-category][data-date]');
+const postGrid = document.querySelector('.post-grid');
+
+if (postGrid && posts.length) {
+  const newestFirst = [...posts].sort((a, b) => b.dataset.date.localeCompare(a.dataset.date));
+  newestFirst.forEach((post) => {
+    post.classList.remove('featured');
+    postGrid.append(post);
+  });
+  newestFirst[0].classList.add('featured');
+}
 
 filters.forEach((button) => {
   button.addEventListener('click', () => {
