@@ -1,24 +1,122 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="description" content="A Cornell-note essay on meaningful AI evaluation." /><title>Evaluating AI — Koh Tze Rui</title><link rel="stylesheet" href="/assets/site.css" /><script defer src="/assets/site.js"></script></head>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A Cornell-note essay on meaningful AI evaluation." />
+  <title>Evaluating AI — Koh Tze Rui</title>
+  <link rel="stylesheet" href="/assets/site.css" />
+  <script defer src="/assets/site.js"></script>
+</head>
+
 <body>
-  <header class="site-header wrap"><a class="brand" href="/"><span class="brand-mark">F/N</span><span>FIELDNOTES</span></a><button class="menu-button" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button><nav id="site-nav" class="site-nav"><a aria-current="page" href="/blog/">Blog</a><a href="/research/">Research</a><a href="/portfolio/">Portfolio</a><a href="/about/">About</a></nav></header>
+  <header class="site-header wrap"><a class="brand" href="/"><span
+        class="brand-mark">F/N</span><span>FIELDNOTES</span></a><button class="menu-button" type="button"
+      aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav id="site-nav" class="site-nav"><a aria-current="page" href="/blog/">Blog</a><a href="/research/">Research</a><a
+        href="/portfolio/">Portfolio</a><a href="/about/">About</a></nav>
+  </header>
   <main class="wrap">
-    <header class="article-head reveal"><p class="article-kicker"><a href="/blog/">← All notes</a><span>•</span><span>Systems</span><span>•</span><span>8 min</span></p><h1>Evaluating AI without fooling ourselves</h1><p class="article-deck">A benchmark is a map, not the territory. Here is a more grounded way to ask whether an AI system is actually useful.</p><div class="cornell-key"><span>Cue / visual anchor</span><span>Main notes / key thinking</span></div></header>
+    <header class="article-head reveal">
+      <p class="article-kicker"><a href="/blog/">← All notes</a><span>•</span><span>Systems</span><span>•</span><span>8
+          min</span></p>
+      <h1>Evaluating AI without fooling ourselves</h1>
+      <p class="article-deck">A benchmark is a map, not the territory. Here is a more grounded way to ask whether an AI
+        system is actually useful.</p>
+      <div class="cornell-key"><span>Cue / visual anchor</span><span>Main notes / key thinking</span></div>
+    </header>
     <article class="cornell-sheet">
       <section class="note-row">
-        <aside class="cue"><span class="cue-label">Cue 01</span><h3>What are we really measuring?</h3><p>Start with the decision the evaluation must support—not the metric that is easiest to collect.</p><div class="cue-visual"><svg viewBox="0 0 260 180" role="img" aria-label="Target with an offset cluster"><circle cx="130" cy="90" r="64" fill="none" stroke="#31584a"/><circle cx="130" cy="90" r="39" fill="none" stroke="#31584a"/><circle cx="130" cy="90" r="15" fill="none" stroke="#31584a"/><g fill="#b75e3f"><circle cx="163" cy="60" r="5"/><circle cx="172" cy="68" r="5"/><circle cx="158" cy="73" r="5"/><circle cx="177" cy="54" r="5"/></g><path d="M32 150L104 111" stroke="#31584a" stroke-dasharray="4 3"/><text x="15" y="166" font-family="monospace" font-size="10" fill="#31584a">PRECISE ≠ RIGHT</text></svg></div></aside>
-        <div class="main-note"><h2>Metrics inherit our assumptions</h2><p>An evaluation is never neutral. The moment we choose a task, a dataset, and a scoring rule, we choose a particular version of success.</p><p>That is useful—provided we keep the assumptions visible. A model can score beautifully on clean test cases and still create friction, confusion, or risk in the messy environment where people actually use it.</p><blockquote class="pull-quote">The dangerous evaluation is not the imperfect one. It is the one mistaken for reality.</blockquote></div>
+        <aside class="cue"><span class="cue-label">Cue 01</span>
+          <h3>What are we really measuring?</h3>
+          <p>Start with the decision the evaluation must support—not the metric that is easiest to collect.</p>
+          <div class="cue-visual"><svg viewBox="0 0 260 180" role="img" aria-label="Target with an offset cluster">
+              <circle cx="130" cy="90" r="64" fill="none" stroke="#31584a" />
+              <circle cx="130" cy="90" r="39" fill="none" stroke="#31584a" />
+              <circle cx="130" cy="90" r="15" fill="none" stroke="#31584a" />
+              <g fill="#b75e3f">
+                <circle cx="163" cy="60" r="5" />
+                <circle cx="172" cy="68" r="5" />
+                <circle cx="158" cy="73" r="5" />
+                <circle cx="177" cy="54" r="5" />
+              </g>
+              <path d="M32 150L104 111" stroke="#31584a" stroke-dasharray="4 3" /><text x="15" y="166"
+                font-family="monospace" font-size="10" fill="#31584a">PRECISE ≠ RIGHT</text>
+            </svg></div>
+        </aside>
+        <div class="main-note">
+          <h2>Metrics inherit our assumptions</h2>
+          <p>An evaluation is never neutral. The moment we choose a task, a dataset, and a scoring rule, we choose a
+            particular version of success.</p>
+          <p>That is useful—provided we keep the assumptions visible. A model can score beautifully on clean test cases
+            and still create friction, confusion, or risk in the messy environment where people actually use it.</p>
+          <blockquote class="pull-quote">The dangerous evaluation is not the imperfect one. It is the one mistaken for
+            reality.</blockquote>
+        </div>
       </section>
       <section class="note-row">
-        <aside class="cue"><span class="cue-label">Cue 02</span><h3>The evaluation stack</h3><p>Move from technical capability to the human outcome.</p><div class="cue-visual"><svg viewBox="0 0 260 190" role="img" aria-label="Four-layer evaluation stack"><g fill="none" stroke="#31584a"><rect x="28" y="132" width="204" height="35"/><rect x="46" y="94" width="168" height="35"/><rect x="64" y="56" width="132" height="35"/><rect x="82" y="18" width="96" height="35"/></g><g font-family="monospace" font-size="10" fill="#31584a" text-anchor="middle"><text x="130" y="40">OUTCOME</text><text x="130" y="78">WORKFLOW</text><text x="130" y="116">BEHAVIOUR</text><text x="130" y="154">CAPABILITY</text></g></svg></div></aside>
-        <div class="main-note"><h2>Test the whole stack</h2><p>Capability tests answer “can it do the thing?” That is only the bottom layer. A useful evaluation climbs higher:</p><ul><li><strong>Capability:</strong> Can the system complete a well-defined task?</li><li><strong>Behaviour:</strong> Is it reliable across edge cases and uncertainty?</li><li><strong>Workflow:</strong> Does it fit the way people actually work?</li><li><strong>Outcome:</strong> Does using it improve the result that matters?</li></ul><p>A failure high in the stack can make every success below it irrelevant.</p></div>
+        <aside class="cue"><span class="cue-label">Cue 02</span>
+          <h3>The evaluation stack</h3>
+          <p>Move from technical capability to the human outcome.</p>
+          <div class="cue-visual"><svg viewBox="0 0 260 190" role="img" aria-label="Four-layer evaluation stack">
+              <g fill="none" stroke="#31584a">
+                <rect x="28" y="132" width="204" height="35" />
+                <rect x="46" y="94" width="168" height="35" />
+                <rect x="64" y="56" width="132" height="35" />
+                <rect x="82" y="18" width="96" height="35" />
+              </g>
+              <g font-family="monospace" font-size="10" fill="#31584a" text-anchor="middle"><text x="130"
+                  y="40">OUTCOME</text><text x="130" y="78">WORKFLOW</text><text x="130" y="116">BEHAVIOUR</text><text
+                  x="130" y="154">CAPABILITY</text></g>
+            </svg></div>
+        </aside>
+        <div class="main-note">
+          <h2>Test the whole stack</h2>
+          <p>Capability tests answer “can it do the thing?” That is only the bottom layer. A useful evaluation climbs
+            higher:</p>
+          <ul>
+            <li><strong>Capability:</strong> Can the system complete a well-defined task?</li>
+            <li><strong>Behaviour:</strong> Is it reliable across edge cases and uncertainty?</li>
+            <li><strong>Workflow:</strong> Does it fit the way people actually work?</li>
+            <li><strong>Outcome:</strong> Does using it improve the result that matters?</li>
+          </ul>
+          <p>A failure high in the stack can make every success below it irrelevant.</p>
+        </div>
       </section>
       <section class="note-row">
-        <aside class="cue"><span class="cue-label">Cue 03</span><h3>Close the loop</h3><p>Evaluation is a practice, not a launch gate.</p><div class="cue-visual"><svg viewBox="0 0 260 170" role="img" aria-label="Observe, test, learn, adjust cycle"><path d="M65 88C65 42 113 21 151 38C197 59 200 116 159 139C118 162 67 134 65 88Z" fill="none" stroke="#31584a" stroke-width="2"/><path d="M145 31L158 38L148 48M168 140L156 139L158 126" fill="none" stroke="#b75e3f" stroke-width="2"/><g font-family="monospace" font-size="9" fill="#31584a"><text x="101" y="26">OBSERVE</text><text x="190" y="88">TEST</text><text x="105" y="158">LEARN</text><text x="22" y="88">ADJUST</text></g></svg></div></aside>
-        <div class="main-note"><h2>Prefer living evaluations</h2><p>The world shifts. Users invent new workflows, data distributions change, and yesterday’s edge case becomes tomorrow’s normal case.</p><p>Keep a small, legible evaluation set close to the product. Add cases when the system surprises you. Record why each case matters. Pair quantitative scores with short human observations. Over time, the test set becomes a history of what your team has learned.</p></div>
+        <aside class="cue"><span class="cue-label">Cue 03</span>
+          <h3>Close the loop</h3>
+          <p>Evaluation is a practice, not a launch gate.</p>
+          <div class="cue-visual"><svg viewBox="0 0 260 170" role="img" aria-label="Observe, test, learn, adjust cycle">
+              <path d="M65 88C65 42 113 21 151 38C197 59 200 116 159 139C118 162 67 134 65 88Z" fill="none"
+                stroke="#31584a" stroke-width="2" />
+              <path d="M145 31L158 38L148 48M168 140L156 139L158 126" fill="none" stroke="#b75e3f" stroke-width="2" />
+              <g font-family="monospace" font-size="9" fill="#31584a"><text x="101" y="26">OBSERVE</text><text x="190"
+                  y="88">TEST</text><text x="105" y="158">LEARN</text><text x="22" y="88">ADJUST</text></g>
+            </svg></div>
+        </aside>
+        <div class="main-note">
+          <h2>Prefer living evaluations</h2>
+          <p>The world shifts. Users invent new workflows, data distributions change, and yesterday’s edge case becomes
+            tomorrow’s normal case.</p>
+          <p>Keep a small, legible evaluation set close to the product. Add cases when the system surprises you. Record
+            why each case matters. Pair quantitative scores with short human observations. Over time, the test set
+            becomes a history of what your team has learned.</p>
+        </div>
       </section>
-      <footer class="note-summary"><span class="cue-label">Summary / take this with you</span><p>Good evaluation connects a model’s capability to a human outcome, makes its assumptions explicit, and keeps learning after launch.</p></footer>
+      <footer class="note-summary"><span class="cue-label">Summary / take this with you</span>
+        <p>Good evaluation connects a model’s capability to a human outcome, makes its assumptions explicit, and keeps
+          learning after launch.</p>
+      </footer>
     </article>
   </main>
-  <footer class="site-footer wrap"><p>© <span data-year></span> Koh Tze Rui</p><nav class="footer-links" aria-label="Contact links"><a href="mailto:kohtzerui@gmail.com">Email</a><a href="https://www.linkedin.com/in/kohtzerui/" target="_blank" rel="noreferrer">LinkedIn</a><a href="https://github.com/kohtzerui" target="_blank" rel="noreferrer">GitHub</a></nav></footer>
-</body></html>
+  <footer class="site-footer wrap">
+    <p>© <span data-year></span> Koh Tze Rui</p>
+    <nav class="footer-links" aria-label="Contact links"><a href="mailto:kohtzerui@gmail.com">Email</a><a
+        href="https://www.linkedin.com/in/kohtzerui/" target="_blank" rel="noreferrer">LinkedIn</a><a
+        href="https://github.com/kohtzerui" target="_blank" rel="noreferrer">GitHub</a></nav>
+  </footer>
+</body>
+
+</html>

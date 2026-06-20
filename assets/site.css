@@ -114,11 +114,34 @@ h2 { font-size: clamp(2.4rem, 4.5vw, 4.4rem); }
 .note-summary { padding: 45px 55px; background: var(--sage-dark); color: var(--white); display: grid; grid-template-columns: 31% 69%; }
 .note-summary .cue-label { color: var(--yellow); }
 .note-summary p { margin: 0; font: 1.5rem/1.45 var(--serif); max-width: 750px; }
+.numbered-notes { list-style: none; padding: 0 !important; counter-reset: inference-step; }
+.numbered-notes li { display: grid; grid-template-columns: 110px 1fr; gap: 20px; border-top: 1px solid var(--line); counter-increment: inference-step; }
+.numbered-notes li:last-child { border-bottom: 1px solid var(--line); }
+.numbered-notes strong::before { content: "0" counter(inference-step) " "; color: var(--rust); font: .65rem var(--mono); }
+.token-demo { display: grid; gap: 13px; margin-top: 25px; }
+.token-demo > div { padding-bottom: 11px; border-bottom: 1px solid var(--line); }
+.token-demo b { display: block; margin-bottom: 7px; font: .56rem var(--mono); color: var(--muted); }
+.token-demo span { display: inline-block; margin: 2px; padding: 4px 6px; background: var(--sage); color: var(--ink); font: .61rem var(--mono); }
+.character-map { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; font: .72rem var(--mono); }
+.character-map span:first-child { font-size: 1.5rem; }
+.character-map code { padding: 5px 7px; background: var(--sage); }
+.note-references { padding: 50px 55px; background: var(--paper); }
+.note-references h2 { margin: 12px 0 8px; font-size: 2.35rem; }
+.reference-key { margin: 0 0 30px; font: .62rem var(--mono); color: var(--muted); }
+.note-references ol { list-style: none; padding: 0; margin: 0; }
+.note-references li { display: grid; grid-template-columns: 35px 1fr; border-top: 1px solid var(--line); padding: 13px 0; }
+.note-references li:last-child { border-bottom: 1px solid var(--line); }
+.note-references li span { color: var(--rust); font: .66rem var(--mono); }
+.note-references a { font-family: var(--serif); font-size: 1.05rem; }
+.note-references a:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 .content-split { display: grid; grid-template-columns: .68fr 1.32fr; gap: 10vw; padding-block: 90px 130px; }
 .content-split aside { font: .68rem var(--mono); color: var(--muted); text-transform: uppercase; }
 .prose h2 { font-size: 3rem; margin: 0 0 28px; }
 .prose p { font-family: var(--serif); font-size: 1.25rem; line-height: 1.8; }
+.about-quote { margin: 42px 0; padding: 25px 30px; border-left: 3px solid var(--rust); background: rgba(169, 189, 165, .16); }
+.about-quote p { margin: 0 0 8px; font-size: 1.55rem; font-style: italic; }
+.about-quote cite { font: .65rem var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
 .fact-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); margin-top: 60px; }
 .fact { background: var(--paper); padding: 25px; }
 .fact strong { display: block; font: 2rem var(--serif); }
@@ -158,6 +181,8 @@ h2 { font-size: clamp(2.4rem, 4.5vw, 4.4rem); }
   .note-row { grid-template-columns: 1fr; }
   .cue { border-right: 0; border-bottom: 1px solid var(--rust); padding: 28px 24px; }
   .main-note { padding: 35px 24px; }
+  .numbered-notes li { grid-template-columns: 1fr; gap: 0; }
+  .note-references { padding: 35px 24px; }
   .note-summary { grid-template-columns: 1fr; gap: 18px; padding: 35px 24px; }
   .note-summary p { font-size: 1.25rem; }
   .cornell-key { display: none; }
