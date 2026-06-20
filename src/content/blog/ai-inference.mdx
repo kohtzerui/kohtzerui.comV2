@@ -1,0 +1,71 @@
+---
+title: "AI Inference: What happens after the model is trained?"
+description: "A visual introduction to prefill, decoding, and the tokenizers that turn text into model-sized pieces."
+publishedAt: 2026-06-20
+tags:
+  - Foundational
+  - Machine Learning
+chapter: Chapter 01
+readTime: 6 min
+summary: "Inference has two stages: prefill processes the input, and decoding generates the output. Tokenization is the first step—it determines the units the model actually sees."
+draft: false
+references:
+  - type: V
+    title: Large Language Models explained briefly
+    url: https://www.youtube.com/watch?v=LPZh9BOjkQs
+  - type: V
+    title: Most devs don’t understand how LLM tokens work
+    url: https://www.youtube.com/watch?v=nKSk_TiR8YA
+  - type: B
+    title: How LLMs Actually Work
+    url: https://www.0xkato.xyz/how-llms-actually-work
+  - type: P
+    title: Attention Is All You Need
+    url: https://doi.org/10.48550/arXiv.1706.03762
+  - type: P
+    title: Qwen2.5-1M Technical Report
+    url: https://doi.org/10.48550/arXiv.2501.15383
+---
+
+<CornellSection cueLabel="Overview / Chapter 01" cueTitle="Two stages of inference" cueText="Inference begins after training. It is the process of using a trained model to respond to an input." visual="inference">
+
+## The inference story
+
+This write-up grew out of optimising Qwen3.5 for the AI-HPC26 competition. Before deciding where to optimise, I needed a clear picture of what actually happens inside an LLM during inference.
+
+At a high level, inference has two parts:
+
+1. **Prefill:** The model processes all of the input tokens and builds the context it will use to answer.
+2. **Decoding:** The model generates the output one token at a time.
+
+This chapter begins at the entrance to prefill: the tokenizer.
+
+</CornellSection>
+
+<CornellSection cueLabel="Prefill / 01A" cueTitle="One sentence, many tokenizations" cueText="The boundaries depend on the tokenizer." visual="tokens">
+
+## Tokenizers turn text into model-sized pieces
+
+Start with the familiar prompt: *“The cat sat on the”*. A language model does not receive this as one continuous sentence. The tokenizer first breaks it into discrete units called **tokens**.
+
+Different tokenizers may split the same text differently:
+
+- **Phrase-like:** `{“The cat”, “sat”, “on the”}`
+- **Word-like:** `{“The”, “cat”, “sat”, “on”, “the”}`
+- **Subword-like:** `{“Th”, “e”, “cat”, “sat”, “on”, “th”, “e”}`
+
+Modern production tokenizers commonly use subword or byte-level pieces. This gives a model a practical vocabulary: it can reuse frequent chunks while still representing unfamiliar words.
+
+</CornellSection>
+
+<CornellSection cueLabel="Why it matters" cueTitle="Text is not always plain words" cueText="Emoji, symbols, code, and multilingual text all need a route into tokens." visual="encoding">
+
+## A tokenizer defines what the model sees
+
+Thinking in phrases, words, or parts gives us different ways to learn patterns in language. Subword and byte-level approaches also give the tokenizer a fallback for special characters, emoji, symbols, and text from many languages.
+
+The text is encoded, segmented, and mapped to numerical token IDs. An emoji may become one token or several, depending on the tokenizer. Those token IDs—not the visual characters themselves—are what the model processes during prefill.
+
+> Before we optimise the model’s work, we need to understand the units of work.
+
+</CornellSection>

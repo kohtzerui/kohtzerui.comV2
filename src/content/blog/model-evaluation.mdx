@@ -1,0 +1,46 @@
+---
+title: Evaluating AI without fooling ourselves
+description: Benchmarks feel objective. They rarely are. A practical note on designing evaluations that survive contact with the real world.
+publishedAt: 2026-06-18
+tags:
+  - Systems
+readTime: 8 min
+summary: Good evaluation connects a model’s capability to a human outcome, makes its assumptions explicit, and keeps learning after launch.
+draft: false
+references: []
+---
+
+<CornellSection cueLabel="Cue 01" cueTitle="What are we really measuring?" cueText="Start with the decision the evaluation must support—not the metric that is easiest to collect.">
+
+## Metrics inherit our assumptions
+
+An evaluation is never neutral. The moment we choose a task, a dataset, and a scoring rule, we choose a particular version of success.
+
+That is useful—provided we keep the assumptions visible. A model can score beautifully on clean test cases and still create friction, confusion, or risk in the messy environment where people actually use it.
+
+> The dangerous evaluation is not the imperfect one. It is the one mistaken for reality.
+
+</CornellSection>
+
+<CornellSection cueLabel="Cue 02" cueTitle="The evaluation stack" cueText="Move from technical capability to the human outcome.">
+
+## Test the whole stack
+
+Capability tests answer “can it do the thing?” That is only the bottom layer. A useful evaluation climbs higher:
+
+- **Capability:** Can the system complete a well-defined task?
+- **Behaviour:** Is it reliable across edge cases and uncertainty?
+- **Workflow:** Does it fit the way people actually work?
+- **Outcome:** Does using it improve the result that matters?
+
+</CornellSection>
+
+<CornellSection cueLabel="Cue 03" cueTitle="Close the loop" cueText="Evaluation is a practice, not a launch gate.">
+
+## Prefer living evaluations
+
+The world shifts. Users invent new workflows, data distributions change, and yesterday’s edge case becomes tomorrow’s normal case.
+
+Keep a small, legible evaluation set close to the product. Add cases when the system surprises you. Record why each case matters.
+
+</CornellSection>

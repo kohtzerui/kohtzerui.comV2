@@ -1,0 +1,23 @@
+---
+interface Props {
+  cueLabel: string;
+  cueTitle: string;
+  cueText?: string;
+  visual?: 'inference' | 'tokens' | 'encoding';
+  cueImage?: string;
+  cueImageAlt?: string;
+}
+const { cueLabel, cueTitle, cueText, visual, cueImage, cueImageAlt = '' } = Astro.props;
+---
+<section class="note-row">
+  <aside class="cue">
+    <span class="cue-label">{cueLabel}</span>
+    <h3>{cueTitle}</h3>
+    {cueText && <p>{cueText}</p>}
+    {cueImage && <figure class="cue-visual cue-image"><img src={cueImage} alt={cueImageAlt} loading="lazy" /></figure>}
+    {visual === 'inference' && <div class="cue-visual"><svg viewBox="0 0 270 190" role="img" aria-label="Inference flow from input through prefill and decoding to output"><defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0L7 3.5L0 7Z" fill="#31584a"/></marker></defs><g fill="none" stroke="#31584a" stroke-width="1.5"><rect x="20" y="64" width="62" height="54" rx="4"/><rect x="104" y="30" width="73" height="48" rx="4"/><rect x="104" y="108" width="73" height="48" rx="4"/><rect x="199" y="64" width="52" height="54" rx="4"/><path d="M82 91L96 57" marker-end="url(#arrow)"/><path d="M82 91L96 130" marker-end="url(#arrow)"/><path d="M177 54L193 81" marker-end="url(#arrow)"/><path d="M177 132L193 102" marker-end="url(#arrow)"/></g><g font-family="monospace" font-size="9" fill="#31584a" text-anchor="middle"><text x="51" y="87">INPUT</text><text x="51" y="100">TOKENS</text><text x="140" y="53">PREFILL</text><text x="140" y="131">DECODING</text><text x="225" y="87">OUTPUT</text><text x="225" y="100">TOKENS</text></g></svg></div>}
+    {visual === 'tokens' && <div class="token-demo" aria-label="Three tokenization examples"><div><b>PHRASES</b><span>The cat</span><span>sat</span><span>on the</span></div><div><b>WORDS</b><span>The</span><span>cat</span><span>sat</span><span>on</span><span>the</span></div><div><b>PARTS</b><span>Th</span><span>e</span><span>cat</span><span>sat</span><span>on</span><span>th</span><span>e</span></div></div>}
+    {visual === 'encoding' && <div class="cue-visual character-map"><span>🙂</span><span>→</span><code>UTF-8 bytes</code><span>→</span><code>token IDs</code></div>}
+  </aside>
+  <div class="main-note"><slot /></div>
+</section>

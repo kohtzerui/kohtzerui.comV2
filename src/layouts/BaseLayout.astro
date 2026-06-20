@@ -1,0 +1,29 @@
+---
+interface Props { title: string; description?: string; current?: 'blog' | 'research' | 'portfolio' | 'about'; }
+const { title, description = 'Research, notes, and selected work by Koh Tze Rui.', current } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content={description} />
+  <title>{title} — Koh Tze Rui</title>
+  <link rel="stylesheet" href="/assets/site.css" />
+  <script is:inline defer src="/assets/site.js"></script>
+</head>
+<body>
+  <header class="site-header wrap">
+    <a class="brand" href="/"><span class="brand-mark">F/N</span><span>FIELDNOTES</span></a>
+    <button class="menu-button" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav id="site-nav" class="site-nav" aria-label="Primary navigation">
+      <a aria-current={current === 'blog' ? 'page' : undefined} href="/blog/">Blog</a>
+      <a aria-current={current === 'research' ? 'page' : undefined} href="/research/">Research</a>
+      <a aria-current={current === 'portfolio' ? 'page' : undefined} href="/portfolio/">Portfolio</a>
+      <a aria-current={current === 'about' ? 'page' : undefined} href="/about/">About</a>
+    </nav>
+  </header>
+  <slot />
+  <footer class="site-footer wrap"><p>© <span data-year></span> Koh Tze Rui</p><nav class="footer-links" aria-label="Contact links"><a href="mailto:kohtzerui@gmail.com">Email</a><a href="https://www.linkedin.com/in/kohtzerui/" target="_blank" rel="noreferrer">LinkedIn</a><a href="https://github.com/kohtzerui" target="_blank" rel="noreferrer">GitHub</a></nav></footer>
+</body>
+</html>

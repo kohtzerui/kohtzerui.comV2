@@ -11,3 +11,9 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+node_modules
+
+# Astro build output
+node_modules/
+dist/
+.astro/

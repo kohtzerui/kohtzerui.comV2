@@ -1,15 +1,43 @@
-# Fieldnotes portfolio
+# kohtzerui.com
 
-A calm, responsive portfolio with Home, Blog, Research, Portfolio, and About pages. Blog articles use a Cornell-note layout with visual cues, main notes, and a final summary.
+An Astro portfolio with a Markdown/MDX-powered Cornell-notes blog.
 
-## Run locally
+## Write or edit a blog post
+
+Posts live in `src/content/blog/`. Open `ai-inference.mdx` to edit the current article—there is no generated HTML to touch.
+
+For a new post:
+
+1. Copy `_template.mdx` and rename it, for example `gpu-memory.mdx`.
+2. Change the frontmatter at the top: title, date, tags, summary, and references.
+3. Set `draft: false` when it is ready to appear.
+4. Write normal Markdown between the reusable `<CornellSection>` blocks.
+
+Markdown basics:
+
+- A blank line starts a new paragraph.
+- `## Heading` creates a section heading.
+- `- item` creates a bullet list.
+- `**text**` makes text bold.
+- `![description](/images/file.png)` adds an image inside the notes.
+- `cueImage="/images/file.png"` places an image in the left cue column.
+- Add images to `public/images/`.
+
+The blog index is generated automatically. The newest `publishedAt` date becomes the featured card; older posts follow below it.
+
+## Local preview
 
 ```powershell
-python -m http.server 4173
+npm install
+npm run dev
 ```
 
-Then open `http://localhost:4173`.
+Open `http://localhost:4173`.
 
-## Deploy to Vercel
+## Production
 
-Import this folder as a new Vercel project. It is a static site and needs no build command. Replace the sample biography, projects, and articles with your own work before publishing.
+```powershell
+npm run build
+```
+
+Vercel detects Astro and publishes the generated `dist/` site.

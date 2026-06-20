@@ -1,0 +1,16 @@
+---
+import { getCollection, render } from 'astro:content';
+import CornellPost from '../../layouts/CornellPost.astro';
+import CornellSection from '../../components/CornellSection.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+<CornellPost post={post}>
+  <Content components={{ CornellSection }} />
+</CornellPost>

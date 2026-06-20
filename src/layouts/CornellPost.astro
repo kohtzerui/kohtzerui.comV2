@@ -1,0 +1,21 @@
+---
+import BaseLayout from './BaseLayout.astro';
+const { post } = Astro.props;
+const { title, description, publishedAt, tags, readTime, summary, references } = post.data;
+const date = publishedAt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+---
+<BaseLayout title={title} description={description} current="blog">
+  <main class="wrap">
+    <header class="article-head reveal">
+      <p class="article-kicker"><a href="/blog/">← All notes</a><span>•</span>{tags.map((tag: string) => <><span>{tag}</span><span>•</span></>)}<span>{readTime || date}</span></p>
+      <h1>{title}</h1>
+      <p class="article-deck">{description}</p>
+      <div class="cornell-key"><span>Cue / visual anchor</span><span>Main notes / key thinking</span></div>
+    </header>
+    <article class="cornell-sheet">
+      <slot />
+      <footer class="note-summary"><span class="cue-label">Summary / take this with you</span><p>{summary}</p></footer>
+      {references.length > 0 && <section class="note-references"><span class="cue-label">Citations &amp; references</span><h2>Continue exploring</h2><p class="reference-key">V / B / P = Video / Blog / Paper</p><ol>{references.map((reference: {type:string;title:string;url:string}) => <li><span>{reference.type}</span><a href={reference.url} target="_blank" rel="noreferrer">{reference.title}</a></li>)}</ol></section>}
+    </article>
+  </main>
+</BaseLayout>

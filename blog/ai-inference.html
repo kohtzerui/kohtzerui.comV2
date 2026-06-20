@@ -1,291 +1,224 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="A foundational look at AI inference, prefill, decoding, and tokenization."
-    />
-    <title>
-      AI Inference: What happens after the model is trained? — Koh Tze Rui
-    </title>
-    <link rel="stylesheet" href="/assets/site.css" />
-    <script defer src="/assets/site.js"></script>
-  </head>
-  <body>
-    <header class="site-header wrap">
-      <a class="brand" href="/"
-        ><span class="brand-mark">F/N</span><span>FIELDNOTES</span></a
-      ><button
-        class="menu-button"
-        type="button"
-        aria-expanded="false"
-        aria-controls="site-nav"
-      >
-        Menu
-      </button>
-      <nav id="site-nav" class="site-nav">
-        <a aria-current="page" href="/blog/">Blog</a
-        ><a href="/research/">Research</a><a href="/portfolio/">Portfolio</a
-        ><a href="/about/">About</a>
-      </nav>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A foundational look at AI inference, prefill, decoding, and tokenization." />
+  <title>
+    AI Inference: What happens after the model is trained?
+  </title>
+  <link rel="stylesheet" href="/assets/site.css" />
+  <script defer src="/assets/site.js"></script>
+</head>
+
+<body>
+  <header class="site-header wrap">
+    <a class="brand" href="/"><span class="brand-mark">F/N</span><span>FIELDNOTES</span></a><button class="menu-button"
+      type="button" aria-expanded="false" aria-controls="site-nav">
+      Menu
+    </button>
+    <nav id="site-nav" class="site-nav">
+      <a aria-current="page" href="/blog/">Blog</a><a href="/research/">Research</a><a
+        href="/portfolio/">Portfolio</a><a href="/about/">About</a>
+    </nav>
+  </header>
+  <main class="wrap">
+    <header class="article-head reveal">
+      <p class="article-kicker">
+        <a href="/blog/">← All notes</a><span>•</span><span>Foundational</span><span>•</span><span>Machine
+          Learning</span>
+      </p>
+      <h1>AI Inference: What happens after the model is trained?</h1>
+      <p class="article-deck">
+        To know where to start optimising an LLM, we first need to understand
+        what happens when it turns an input into an output.
+      </p>
+      <div class="cornell-key">
+        <span>Cue / visual anchor</span><span>Main notes / key thinking</span>
+      </div>
     </header>
-    <main class="wrap">
-      <header class="article-head reveal">
-        <p class="article-kicker">
-          <a href="/blog/">← All notes</a><span>•</span><span>Foundational</span
-          ><span>•</span><span>Machine Learning</span>
-        </p>
-        <h1>AI Inference: What happens after the model is trained?</h1>
-        <p class="article-deck">
-          To know where to start optimising an LLM, we first need to understand
-          what happens when it turns an input into an output.
-        </p>
-        <div class="cornell-key">
-          <span>Cue / visual anchor</span><span>Main notes / key thinking</span>
-        </div>
-      </header>
-      <article class="cornell-sheet">
-        <section class="note-row">
-          <aside class="cue">
-            <span class="cue-label">Overview / Chapter 01</span>
-            <h3>Two stages of inference</h3>
-            <p>
-              Inference begins after training. It is the process of using a
-              trained model to respond to an input.
-            </p>
-            <div class="cue-visual">
-              <svg
-                viewBox="0 0 270 190"
-                role="img"
-                aria-label="Inference flow from prompt through prefill and decoding to response"
-              >
-                <defs>
-                  <marker
-                    id="arrow"
-                    markerWidth="7"
-                    markerHeight="7"
-                    refX="6"
-                    refY="3.5"
-                    orient="auto"
-                  >
-                    <path d="M0 0L7 3.5L0 7Z" fill="#31584a" />
-                  </marker>
-                </defs>
-                <g fill="none" stroke="#31584a" stroke-width="1.5">
-                  <rect x="20" y="64" width="62" height="54" rx="4" />
-                  <rect x="104" y="30" width="73" height="48" rx="4" />
-                  <rect x="104" y="108" width="73" height="48" rx="4" />
-                  <rect x="199" y="64" width="52" height="54" rx="4" />
-                  <path d="M82 91L96 57" marker-end="url(#arrow)" />
-                  <path d="M82 91L96 130" marker-end="url(#arrow)" />
-                  <path d="M177 54L193 81" marker-end="url(#arrow)" />
-                  <path d="M177 132L193 102" marker-end="url(#arrow)" />
-                </g>
-                <g
-                  font-family="monospace"
-                  font-size="9"
-                  fill="#31584a"
-                  text-anchor="middle"
-                >
-                  <text x="51" y="87">INPUT</text>
-                  <text x="51" y="100">TOKENS</text>
-                  <text x="140" y="53">PREFILL</text>
-                  <text x="140" y="131">DECODING</text>
-                  <text x="225" y="87">OUTPUT</text>
-                  <text x="225" y="100">TOKENS</text>
-                </g>
-              </svg>
-            </div>
-          </aside>
-          <div class="main-note">
-            <h2>The inference story</h2>
-            <p>
-              This write-up grew out of optimising Qwen3.5 for the AI-HPC26
-              competition. Before deciding where to optimise, I needed a clear
-              picture of what actually happens inside an LLM during inference.
-            </p>
-            <p>At a high level, inference has two parts:</p>
-            <ol class="numbered-notes">
-              <li>
-                <strong>Prefill</strong
-                ><span
-                  >The model processes all of the input tokens and builds the
-                  context it will use to answer.</span
-                >
-              </li>
-              <li>
-                <strong>Decoding</strong
-                ><span
-                  >The model generates the output one token at a time.</span
-                >
-              </li>
-            </ol>
-            <p>
-              This chapter begins at the entrance to prefill: the tokenizer.
-            </p>
-          </div>
-        </section>
-        <section class="note-row">
-          <aside class="cue">
-            <span class="cue-label">Prefill / 01A</span>
-            <h3>One sentence, many tokenizations</h3>
-            <p>The boundaries depend on the tokenizer.</p>
-            <div
-              class="token-demo"
-              aria-label="Three ways to tokenize The cat sat on the"
-            >
-              <div>
-                <b>PHRASES</b><span>The cat</span><span>sat</span
-                ><span>on the</span>
-              </div>
-              <div>
-                <b>WORDS</b><span>The</span><span>cat</span><span>sat</span
-                ><span>on</span><span>the</span>
-              </div>
-              <div>
-                <b>PARTS</b><span>Th</span><span>e</span><span>cat</span
-                ><span>sat</span><span>on</span><span>th</span><span>e</span>
-              </div>
-            </div>
-          </aside>
-          <div class="main-note">
-            <h2>Tokenizers turn text into model-sized pieces</h2>
-            <p>
-              Start with the familiar prompt: <em>“The cat sat on the”</em>. A
-              language model does not receive this as one continuous sentence.
-              The tokenizer first breaks it into discrete units called
-              <strong>tokens</strong>.
-            </p>
-            <p>Different tokenizers may split the same text differently:</p>
-            <ul>
-              <li>
-                <strong>Phrase-like:</strong> {“The cat”, “sat”, “on the”}
-              </li>
-              <li>
-                <strong>Word-like:</strong> {“The”, “cat”, “sat”, “on”, “the”}
-              </li>
-              <li>
-                <strong>Subword-like:</strong> {“Th”, “e”, “cat”, “sat”, “on”,
-                “th”, “e”}
-              </li>
-            </ul>
-            <p>
-              Modern production tokenizers commonly use subword or byte-level
-              pieces. This gives a model a practical vocabulary: it can reuse
-              frequent chunks while still representing unfamiliar words.
-            </p>
-          </div>
-        </section>
-        <section class="note-row">
-          <aside class="cue">
-            <span class="cue-label">Why it matters</span>
-            <h3>Text is not always plain words</h3>
-            <p>
-              Emoji, symbols, code, and multilingual text all need a route into
-              tokens.
-            </p>
-            <div class="cue-visual character-map">
-              <span>🙂</span><span>→</span><code>UTF-8 bytes</code><span>→</span
-              ><code>token IDs</code>
-            </div>
-          </aside>
-          <div class="main-note">
-            <h2>A tokenizer defines what the model sees</h2>
-            <p>
-              Thinking in phrases, words, or parts gives us different ways to
-              learn patterns in language. Subword and byte-level approaches also
-              give the tokenizer a fallback for special characters, emoji,
-              symbols, and text from many languages.
-            </p>
-            <p>
-              The text is encoded, segmented, and mapped to numerical token IDs.
-              An emoji may become one token or several, depending on the
-              tokenizer. Those token IDs—not the visual characters
-              themselves—are what the model processes during prefill.
-            </p>
-            <blockquote class="pull-quote">
-              Before we optimise the model’s work, we need to understand the
-              units of work.
-            </blockquote>
-          </div>
-        </section>
-        <footer class="note-summary">
-          <span class="cue-label">Summary / take this with you</span>
+    <article class="cornell-sheet">
+      <section class="note-row">
+        <aside class="cue">
+          <span class="cue-label">Overview / Chapter 01</span>
+          <h3>Two stages of inference</h3>
           <p>
-            Inference has two stages: prefill processes the input, and decoding
-            generates the output. Tokenization is the first step—it determines
-            the units the model actually sees.
+            Inference begins after training. It is the process of using a
+            trained model to respond to an input.
           </p>
-        </footer>
-        <section class="note-references">
-          <span class="cue-label">Citations &amp; references</span>
-          <h2>Continue exploring</h2>
-          <p class="reference-key">V / B / P = Video / Blog / Paper</p>
-          <ol>
+          <div class="cue-visual">
+            <svg viewBox="0 0 270 190" role="img"
+              aria-label="Inference flow from prompt through prefill and decoding to response">
+              <defs>
+                <marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+                  <path d="M0 0L7 3.5L0 7Z" fill="#31584a" />
+                </marker>
+              </defs>
+              <g fill="none" stroke="#31584a" stroke-width="1.5">
+                <rect x="20" y="64" width="62" height="54" rx="4" />
+                <rect x="104" y="30" width="73" height="48" rx="4" />
+                <rect x="104" y="108" width="73" height="48" rx="4" />
+                <rect x="199" y="64" width="52" height="54" rx="4" />
+                <path d="M82 91L96 57" marker-end="url(#arrow)" />
+                <path d="M82 91L96 130" marker-end="url(#arrow)" />
+                <path d="M177 54L193 81" marker-end="url(#arrow)" />
+                <path d="M177 132L193 102" marker-end="url(#arrow)" />
+              </g>
+              <g font-family="monospace" font-size="9" fill="#31584a" text-anchor="middle">
+                <text x="51" y="87">INPUT</text>
+                <text x="51" y="100">TOKENS</text>
+                <text x="140" y="53">PREFILL</text>
+                <text x="140" y="131">DECODING</text>
+                <text x="225" y="87">OUTPUT</text>
+                <text x="225" y="100">TOKENS</text>
+              </g>
+            </svg>
+          </div>
+        </aside>
+        <div class="main-note">
+          <h2>The inference story</h2>
+          <p>
+            This write-up grew out of optimising Qwen3.5 for the AI-HPC26
+            competition. Before deciding where to optimise, I needed a clear
+            picture of what actually happens inside an LLM during inference.
+          </p>
+          <p>At a high level, inference has two parts:</p>
+          <ol class="numbered-notes">
             <li>
-              <span>V</span
-              ><a
-                href="https://www.youtube.com/watch?v=LPZh9BOjkQs"
-                target="_blank"
-                rel="noreferrer"
-                >Large Language Models explained briefly</a
-              >
+              <strong>Prefill</strong><span>The model processes all of the input tokens and builds the
+                context it will use to answer.</span>
             </li>
             <li>
-              <span>V</span
-              ><a
-                href="https://www.youtube.com/watch?v=nKSk_TiR8YA"
-                target="_blank"
-                rel="noreferrer"
-                >Most devs don’t understand how LLM tokens work</a
-              >
-            </li>
-            <li>
-              <span>B</span
-              ><a
-                href="https://www.0xkato.xyz/how-llms-actually-work"
-                target="_blank"
-                rel="noreferrer"
-                >How LLMs Actually Work</a
-              >
-            </li>
-            <li>
-              <span>P</span
-              ><a
-                href="https://doi.org/10.48550/arXiv.1706.03762"
-                target="_blank"
-                rel="noreferrer"
-                >Attention Is All You Need</a
-              >
-            </li>
-            <li>
-              <span>P</span
-              ><a
-                href="https://doi.org/10.48550/arXiv.2501.15383"
-                target="_blank"
-                rel="noreferrer"
-                >Qwen2.5-1M Technical Report</a
-              >
+              <strong>Decoding</strong><span>The model generates the output one token at a time.</span>
             </li>
           </ol>
-        </section>
-      </article>
-    </main>
-    <footer class="site-footer wrap">
-      <p>© <span data-year></span> Koh Tze Rui</p>
-      <nav class="footer-links" aria-label="Contact links">
-        <a href="mailto:kohtzerui@gmail.com">Email</a
-        ><a
-          href="https://www.linkedin.com/in/kohtzerui/"
-          target="_blank"
-          rel="noreferrer"
-          >LinkedIn</a
-        ><a href="https://github.com/kohtzerui" target="_blank" rel="noreferrer"
-          >GitHub</a
-        >
-      </nav>
-    </footer>
-  </body>
+          <p>
+            This chapter begins at the entrance to prefill: the tokenizer.
+          </p>
+        </div>
+      </section>
+      <section class="note-row">
+        <aside class="cue">
+          <span class="cue-label">Prefill / 01A</span>
+          <h3>One sentence, many tokenizations</h3>
+          <p>The boundaries depend on the tokenizer.</p>
+          <div class="token-demo" aria-label="Three ways to tokenize The cat sat on the">
+            <div>
+              <b>PHRASES</b><span>The cat</span><span>sat</span><span>on the</span>
+            </div>
+            <div>
+              <b>WORDS</b><span>The</span><span>cat</span><span>sat</span><span>on</span><span>the</span>
+            </div>
+            <div>
+              <b>PARTS</b><span>Th</span><span>e</span><span>cat</span><span>sat</span><span>on</span><span>th</span><span>e</span>
+            </div>
+          </div>
+        </aside>
+        <div class="main-note">
+          <h2>Tokenizers turn text into model-sized pieces</h2>
+          <p>
+            Start with the familiar prompt: <em>“The cat sat on the”</em>. A
+            language model does not receive this as one continuous sentence.
+            The tokenizer first breaks it into discrete units called
+            <strong>tokens</strong>.
+          </p>
+          <p>Different tokenizers may split the same text differently:</p>
+          <ul>
+            <li>
+              <strong>Phrase-like:</strong> {“The cat”, “sat”, “on the”}
+            </li>
+            <li>
+              <strong>Word-like:</strong> {“The”, “cat”, “sat”, “on”, “the”}
+            </li>
+            <li>
+              <strong>Subword-like:</strong> {“Th”, “e”, “cat”, “sat”, “on”,
+              “th”, “e”}
+            </li>
+          </ul>
+          <p>
+            Modern production tokenizers commonly use subword or byte-level
+            pieces. This gives a model a practical vocabulary: it can reuse
+            frequent chunks while still representing unfamiliar words.
+          </p>
+        </div>
+      </section>
+      <section class="note-row">
+        <aside class="cue">
+          <span class="cue-label">Why it matters</span>
+          <h3>Text is not always plain words</h3>
+          <p>
+            Emoji, symbols, code, and multilingual text all need a route into
+            tokens.
+          </p>
+          <div class="cue-visual character-map">
+            <span>🙂</span><span>→</span><code>UTF-8 bytes</code><span>→</span><code>token IDs</code>
+          </div>
+        </aside>
+        <div class="main-note">
+          <h2>A tokenizer defines what the model sees</h2>
+          <p>
+            Thinking in phrases, words, or parts gives us different ways to
+            learn patterns in language. Subword and byte-level approaches also
+            give the tokenizer a fallback for special characters, emoji,
+            symbols, and text from many languages.
+          </p>
+          <p>
+            The text is encoded, segmented, and mapped to numerical token IDs.
+            An emoji may become one token or several, depending on the
+            tokenizer. Those token IDs—not the visual characters
+            themselves—are what the model processes during prefill.
+          </p>
+          <blockquote class="pull-quote">
+            Before we optimise the model’s work, we need to understand the
+            units of work.
+          </blockquote>
+        </div>
+      </section>
+      <footer class="note-summary">
+        <span class="cue-label">Summary / take this with you</span>
+        <p>
+          Inference has two stages: prefill processes the input, and decoding
+          generates the output. Tokenization is the first step—it determines
+          the units the model actually sees.
+        </p>
+      </footer>
+      <section class="note-references">
+        <span class="cue-label">Citations &amp; references</span>
+        <h2>Continue exploring</h2>
+        <p class="reference-key">V / B / P = Video / Blog / Paper</p>
+        <ol>
+          <li>
+            <span>V</span><a href="https://www.youtube.com/watch?v=LPZh9BOjkQs" target="_blank" rel="noreferrer">Large
+              Language Models explained briefly</a>
+          </li>
+          <li>
+            <span>V</span><a href="https://www.youtube.com/watch?v=nKSk_TiR8YA" target="_blank" rel="noreferrer">Most
+              devs don’t understand how LLM tokens work</a>
+          </li>
+          <li>
+            <span>B</span><a href="https://www.0xkato.xyz/how-llms-actually-work" target="_blank" rel="noreferrer">How
+              LLMs Actually Work</a>
+          </li>
+          <li>
+            <span>P</span><a href="https://doi.org/10.48550/arXiv.1706.03762" target="_blank" rel="noreferrer">Attention
+              Is All You Need</a>
+          </li>
+          <li>
+            <span>P</span><a href="https://doi.org/10.48550/arXiv.2501.15383" target="_blank"
+              rel="noreferrer">Qwen2.5-1M Technical Report</a>
+          </li>
+        </ol>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer wrap">
+    <p>© <span data-year></span> Koh Tze Rui</p>
+    <nav class="footer-links" aria-label="Contact links">
+      <a href="mailto:kohtzerui@gmail.com">Email</a><a href="https://www.linkedin.com/in/kohtzerui/" target="_blank"
+        rel="noreferrer">LinkedIn</a><a href="https://github.com/kohtzerui" target="_blank" rel="noreferrer">GitHub</a>
+    </nav>
+  </footer>
+</body>
+
 </html>
