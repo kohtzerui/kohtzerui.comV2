@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Portfolio" description="Selected work by Koh Tze Rui." current="portfolio">
+  <main>
+    <header class="page-head wrap reveal">
+      <p class="eyebrow">Portfolio / Selected work</p>
+      <h1>Made with<br /><em>purpose.</em></h1>
+      <p>A small selection of research, systems, and product work. Each project began with a question, not a feature list.</p>
+    </header>
+
+    <section class="project-list wrap">
+      <article class="project"><span class="project-num">01</span><div><h2>AI inference notes</h2><p>A visual Cornell-note style explanation of what happens after a model is trained, from prefill to decoding.</p><div class="desk-tags"><span>LLMs</span><span>Visual explanation</span></div></div><span class="project-type">Write-up · 2026</span><span>↗</span></article>
+      <article class="project"><span class="project-num">02</span><div><h2>AI-HPC optimisation practice</h2><p>Learning how to reason about model inference performance through Qwen optimisation work and systems experiments.</p><div class="desk-tags"><span>HPC</span><span>Inference</span></div></div><span class="project-type">Work in progress · 2026</span><span>↗</span></article>
+      <article class="project"><span class="project-num">03</span><div><h2>Fieldnotes website</h2><p>A personal portfolio and mental notebook designed around visual technical writing and reusable learning paths.</p><div class="desk-tags"><span>Astro</span><span>Writing system</span></div></div><span class="project-type">Website · 2026</span><span>↗</span></article>
+    </section>
+  </main>
+</BaseLayout>

@@ -27,7 +27,7 @@ references:
     url: https://doi.org/10.48550/arXiv.2501.15383
 ---
 
-<CornellSection cueLabel="Inspiration" cueTitle="Why inference?" cueText="Before optimising an LLM, I need to understand what actually happens when it runs." visual="inference">
+<CornellSection cueLabel="Inspiration" cueTitle="Why inference?" cueText="Before optimising an LLM, I need to understand what actually happens when it runs." cueImage="/images/blog/ai-inference-overview.png" cueImageAlt="Overview diagram showing input flowing through prefill, decode, and output.">
 
 ## Inspiration
 
@@ -40,15 +40,15 @@ Here is the general story. There are two parts to inference:
 1. **Prefill:** the processing of the input tokens.
 2. **Decoding:** the process of generating the output tokens.
 
-When I say “during training,” for now, you can assume that to be true, at least until I write my next blog on AI pretraining/training.
+When I say "during training," for now, you can assume that to be true, at least until I write my next blog on AI pretraining/training.
 
 </CornellSection>
 
-<CornellSection cueLabel="Prefill / 1A" cueTitle="Tokenizers" cueText="The same sentence can be split into phrases, words, or smaller parts depending on the tokenizer." visual="tokens">
+<CornellSection cueLabel="Prefill / 1A" cueTitle="Tokenizers" cueText="The same sentence can be split into phrases, words, or smaller parts depending on the tokenizer." cueImage="/images/blog/ai-inference-prefill-map.png" cueImageAlt="Prefill diagram showing token sequence, embedding lookup, position encoding, attention, KV cache, FFN, and initial context set.">
 
 ## Tokenizers
 
-Let’s start with the famous example: `The cat sat on the`.
+Let's start with the famous example: `The cat sat on the`.
 
 Depending on the tokenizer, this sentence can be broken up differently. In other words, the split varies across different tokenizers.
 
@@ -64,26 +64,30 @@ There are other tricks for breaking down special characters like emojis, symbols
 
 </CornellSection>
 
-<CornellSection cueLabel="Prefill / 1B" cueTitle="Mapping to embeddings" cueText="Tokens become token IDs, then token IDs become vectors the model can process." visual="encoding">
+<CornellSection cueLabel="Prefill / 1B" cueTitle="Mapping to embeddings" cueText="Tokens become token IDs, then token IDs become vectors the model can process." cueImage="/images/blog/ai-inference-prefill-map.png" cueImageAlt="Prefill diagram showing token sequence, embedding lookup, position encoding, attention, KV cache, FFN, and initial context set.">
 
-## Mapping → Embedding / Hidden State
+## Mapping -> Embedding / Hidden State
 
-During training, the model has access to something called a vocabulary. Let’s just say it has a size of 1,000,000.
+During training, the model has access to something called a vocabulary. Let's just say it has a size of 1,000,000.
 
 The tokenized parts get converted into numbers called **token IDs**. Most of the time, tokenizers are case-sensitive.
 
 ```text
 {"Th", "e", "sat", "on", "th", "e"}
-→ {68, 4, 199764, 170, 10068, 4}
+-> {68, 4, 199764, 170, 10068, 4}
 ```
+
+<figure class="note-figure">
+  <img src="/images/blog/ai-inference-token-to-embedding.png" alt="Diagram showing tokens mapped to token IDs, then through a learned embedding matrix into hidden vectors." loading="lazy" />
+</figure>
 
 Each token ID indexes into an embedding table, producing a hidden vector of dimension `d_model`. Depending on the model, this might be hundreds, thousands, or more dimensions. For example, many large transformer models use hidden sizes such as 4096, but the exact number is architecture-specific.
 
 </CornellSection>
 
-<CornellSection cueLabel="Prefill / 1C" cueTitle="RoPE and KV cache" cueText="Q, K, and V are built from the hidden vector. RoPE helps the model understand position." visual="inference">
+<CornellSection cueLabel="Prefill / 1C" cueTitle="RoPE and KV cache" cueText="Q, K, and V are built from the hidden vector. RoPE helps the model understand position." cueImage="/images/blog/ai-inference-prefill-map.png" cueImageAlt="Prefill diagram showing token sequence, embedding lookup, position encoding, attention, KV cache, FFN, and initial context set.">
 
-## Embedding Handling: RoPE → KV Cache
+## Embedding Handling: RoPE -> KV Cache
 
 More on this later.
 
@@ -106,20 +110,20 @@ For example, `cat bit dog` and `dog bit cat` have two different meanings based o
 RoPE is usually applied to the Query and Key vectors before the attention dot product. This injects positional information into the attention scores. The Value vectors are usually not RoPE-rotated.
 
 ```text
-Attention Score = RoPE(Q_cat, P1) · RoPE(K_bit, P2)
+Attention Score = RoPE(Q_cat, P1) dot RoPE(K_bit, P2)
 ```
 
-Here, `·` is the dot product, and `P1` is the position of `cat` in the initial prompt. Later, I’ll just use Q and K without writing RoPE every time, but mentally note that it is there.
+Here, `dot` means dot product, and `P1` is the position of `cat` in the initial prompt. Later, I'll just use Q and K without writing RoPE every time, but mentally note that it is there.
 
 </CornellSection>
 
-<CornellSection cueLabel="Prefill / 1D" cueTitle="Attention" cueText="Attention compares Q and K, then uses the result to mix V." visual="tokens">
+<CornellSection cueLabel="Prefill / 1D" cueTitle="Attention" cueText="Attention compares Q and K, then uses the result to mix V." cueImage="/images/blog/ai-inference-prefill-map.png" cueImageAlt="Prefill diagram showing token sequence, embedding lookup, position encoding, attention, KV cache, FFN, and initial context set." cueImage2="/images/blog/ai-inference-multihead-attention.png" cueImage2Alt="Diagram showing a current token routed through grammar, coreference, positional, and induction attention heads, then concatenated and mixed into an output vector.">
 
-## Attention → Multi-Head Attention (MHA)
+## Attention -> Multi-Head Attention (MHA)
 
 Now that we know how embeddings are handled, we can define attention, which is the key trait that the learned projection matrices prioritise. Some heads may be good at paying attention to grammar, others to position, etc.
 
-For context, let’s use this input:
+For context, let's use this input:
 
 ```text
 The cat that I saw yesterday was sleeping
@@ -127,17 +131,19 @@ The cat that I saw yesterday was sleeping
 
 The high-level idea is:
 
-1. Attention Score `(A) = Q · K`
+1. Attention Score `(A) = Q dot K`
 2. Softmax normalisation makes the terms sum to 1.
-3. New Token Vector `= A · V`
+3. New Token Vector `= A dot V`
 
 The actual formula is:
 
 ```text
-Attention(Q, K, V) = softmax((QKᵀ / sqrt(d_head)) + mask) V
+Attention(Q, K, V) = softmax((QK^T / sqrt(d_head)) + mask) V
 ```
 
-[Diagram slot: nodes and tables]
+<figure class="note-figure">
+  <img src="/images/blog/ai-inference-attention-scores.png" alt="Annotated attention score table showing query and key directions, normalized attention scores, and causal masking over future values." loading="lazy" />
+</figure>
 
 The model computes dot products between Queries and Keys, scales them, applies the causal mask, then uses softmax to turn them into attention weights. These weights are used to take a weighted sum of the Value vectors.
 
@@ -147,21 +153,25 @@ After all the heads are done processing, the model combines the results through 
 
 </CornellSection>
 
-<CornellSection cueLabel="Prefill / 1E" cueTitle="FFN / MLP" cueText="Attention mixes information across tokens. The FFN transforms each token's hidden state." visual="encoding">
+<CornellSection cueLabel="Prefill / 1E" cueTitle="FFN / MLP" cueText="Attention mixes information across tokens. The FFN transforms each token's hidden state." cueImage="/images/blog/ai-inference-prefill-map.png" cueImageAlt="Prefill diagram showing token sequence, embedding lookup, position encoding, attention, KV cache, FFN, and initial context set.">
 
 ## Feed-Forward Network (FFN) / Multi-Layer Perceptron (MLP)
 
+<figure class="note-figure note-figure-narrow">
+  <img src="/images/blog/ai-inference-ffn-mlp.png" alt="Diagram of a feed-forward neural network with input nodes, hidden layers, and output nodes." loading="lazy" />
+</figure>
+
 This layer is relatively straightforward:
 
-1. The output vector from attention is scaled up, often around 4×.
+1. The output vector from attention is scaled up, often around 4x.
 2. A non-linear function is applied to its expanded form.
 3. A linear projection matrix scales it back down to the original number of dimensions.
 
-The FFN/MLP usually expands the hidden dimension, applies a non-linear activation such as GELU or SwiGLU, then projects it back down to the original hidden size. The expansion ratio is often around 4×, but modern models may use different ratios and gated activations.
+The FFN/MLP usually expands the hidden dimension, applies a non-linear activation such as GELU or SwiGLU, then projects it back down to the original hidden size. The expansion ratio is often around 4x, but modern models may use different ratios and gated activations.
 
 </CornellSection>
 
-<CornellSection cueLabel="Prefill / 1F" cueTitle="Residual stream" cueText="The model keeps adding useful updates back into the running hidden state." visual="inference">
+<CornellSection cueLabel="Prefill / 1F" cueTitle="Residual stream" cueText="The model keeps adding useful updates back into the running hidden state." cueImage="/images/blog/ai-inference-prefill-map.png" cueImageAlt="Prefill diagram showing token sequence, embedding lookup, position encoding, attention, KV cache, FFN, and initial context set.">
 
 ## Residual Stream
 
@@ -178,17 +188,21 @@ A transformer layer usually consists of this MHA layer and FFN layer. Assuming t
 
 </CornellSection>
 
-<CornellSection cueLabel="Decoding / 2A" cueTitle="Next token" cueText="The model turns the final hidden state into logits, then probabilities." visual="tokens">
+<CornellSection cueLabel="Decoding / 2A" cueTitle="Next token" cueText="The model turns the final hidden state into logits, then probabilities.">
 
 ## Generating the Next Token
 
-Remember how we projected the initial token ID into an embedding. There is also another matrix that “unembeds” it. This is performed on `x_output`.
+Remember how we projected the initial token ID into an embedding. There is also another matrix that "unembeds" it. This is performed on `x_output`.
 
 The unembedded output is known as **logits**. Subsequently, we apply softmax on the logits to get a distribution of probabilities for what word, or token, could come next.
 
+<figure class="note-figure">
+  <img src="/images/blog/ai-inference-logits-probability.png" alt="Sketch showing probability on the y-axis and vocabulary on the x-axis, with possible next tokens such as mat, chair, and seat." loading="lazy" />
+</figure>
+
 </CornellSection>
 
-<CornellSection cueLabel="Decoding / 2B" cueTitle="Sampling settings" cueText="The same prompt can lead to different outputs because generation is probabilistic." visual="encoding">
+<CornellSection cueLabel="Decoding / 2B" cueTitle="Sampling settings" cueText="The same prompt can lead to different outputs because generation is probabilistic.">
 
 ## Extra Settings
 
@@ -218,9 +232,13 @@ This makes `Mat` more likely. There are also settings like **top-k**, which migh
 
 </CornellSection>
 
-<CornellSection cueLabel="Decoding / 2C" cueTitle="Looping forward" cueText="The generated token becomes the next input. New K and V vectors are appended to the KV cache." visual="inference">
+<CornellSection cueLabel="Decoding / 2C" cueTitle="Looping forward" cueText="The generated token becomes the next input. New K and V vectors are appended to the KV cache.">
 
 ## Generating the Next Next Token
+
+<figure class="note-figure note-figure-narrow">
+  <img src="/images/blog/ai-inference-decoding-loop.png" alt="Diagram showing the decoding loop for a single generated token, including embedding lookup, position encoding, transformer block, KV cache read and write, unembedding, softmax, sampling, and next token ID." loading="lazy" />
+</figure>
 
 Now, if the word `Mat` is chosen, it is fed into the model as the next input token.
 

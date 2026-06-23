@@ -83,7 +83,7 @@ h2 { font-size: clamp(2.4rem, 4.5vw, 4.4rem); }
 .post-card:hover { background: var(--white); }
 .post-card-content { display: flex; flex-direction: column; height: 100%; }
 .post-card:not(.featured) .post-visual { display: none; }
-.post-card.featured .post-category::before { content: "Latest · "; color: var(--rust); }
+.post-card.featured .post-category::before { content: "Latest ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· "; color: var(--rust); }
 .post-visual { display: grid; place-items: center; padding: 15px; background: rgba(169, 189, 165, .12); }
 .post-card.featured { grid-column: span 2; min-height: 360px; display: grid; grid-template-columns: 1fr 1fr; gap: 45px; }
 .post-meta { display: flex; align-items: center; justify-content: space-between; font: .63rem var(--mono); text-transform: uppercase; color: var(--muted); }
@@ -109,11 +109,16 @@ h2 { font-size: clamp(2.4rem, 4.5vw, 4.4rem); }
 .cue-label { font: .62rem var(--mono); letter-spacing: .13em; text-transform: uppercase; color: var(--rust); }
 .cue h3 { font-size: 1.55rem; margin: 12px 0 18px; }
 .cue p { color: var(--muted); font-size: .78rem; }
-.cue-visual { margin-top: 25px; padding: 15px; background: var(--paper); border: 1px solid var(--line); }
+.cue-visual { margin-top: 25px; padding: 8px; background: var(--paper); border: 1px solid var(--line); }
+.cue-image { padding: 0; overflow: hidden; }
+.cue-image img { display: block; width: 100%; height: auto; }
 .main-note h2 { font-size: 2.35rem; margin-bottom: 24px; }
 .main-note p { font-family: var(--serif); font-size: 1.15rem; line-height: 1.8; }
 .main-note ul { padding-left: 20px; }
 .main-note li { padding: 6px 0; }
+.note-figure { margin: 30px 0; border: 1px solid var(--line); background: var(--paper); overflow: hidden; }
+.note-figure img { display: block; width: 100%; height: auto; }
+.note-figure-narrow { max-width: 560px; margin-left: auto; margin-right: auto; }
 .pull-quote { border-left: 3px solid var(--yellow); padding: 8px 0 8px 25px; font: italic 1.55rem/1.35 var(--serif); margin: 32px 0; }
 .note-summary { padding: 45px 55px; background: var(--sage-dark); color: var(--white); display: grid; grid-template-columns: 31% 69%; }
 .note-summary .cue-label { color: var(--yellow); }
