@@ -9,10 +9,21 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <p>Ongoing inquiries, experiments, and reading trails. These are living questions rather than polished answers.</p>
     </header>
 
+    <section class="identity-map wrap reveal" aria-label="Research identity map">
+      <div>
+        <p class="eyebrow">Research map / Core interests</p>
+        <h2>Where my interests overlap.</h2>
+        <p>My current centre of gravity sits between Artificial Intelligence, High Performance Computing, and Concurrency: understanding intelligent systems, making them fast, and reasoning about work that happens in parallel.</p>
+      </div>
+      <figure class="identity-mark">
+        <img src="/images/brand/research-venn-symbol-transparent.png" alt="Venn diagram logo showing Artificial Intelligence, High Performance Computing, and Concurrency as overlapping circles." loading="lazy" />
+      </figure>
+    </section>
+
     <section class="project-list wrap">
-      <article class="project"><span class="project-num">01</span><div><h2>Visual explanations for AI systems</h2><p>How might spatial notes, diagrams, and progressive disclosure help technical readers reason about model behaviour?</p></div><span class="project-type">Active · Human-AI</span><span>↗</span></article>
-      <article class="project"><span class="project-num">02</span><div><h2>High Performance Computing for AI</h2><p>Understanding how systems choices, memory movement, kernels, and parallelism shape the speed of model inference.</p></div><span class="project-type">Reading trail · HPC</span><span>↗</span></article>
-      <article class="project"><span class="project-num">03</span><div><h2>Interfaces as learning environments</h2><p>Exploring how explanations and tooling can teach mental models without turning into instruction manuals.</p></div><span class="project-type">Writing · Design</span><span>↗</span></article>
+      <article class="project"><span class="project-num">01</span><div><h2>Visual explanations for AI systems</h2><p>How might spatial notes, diagrams, and progressive disclosure help technical readers reason about model behaviour?</p></div><span class="project-type">Active - Human-AI</span><span>-&gt;</span></article>
+      <article class="project"><span class="project-num">02</span><div><h2>High Performance Computing for AI</h2><p>Understanding how systems choices, memory movement, kernels, and parallelism shape the speed of model inference.</p></div><span class="project-type">Reading trail - HPC</span><span>-&gt;</span></article>
+      <article class="project"><span class="project-num">03</span><div><h2>Interfaces as learning environments</h2><p>Exploring how explanations and tooling can teach mental models without turning into instruction manuals.</p></div><span class="project-type">Writing - Design</span><span>-&gt;</span></article>
     </section>
   </main>
 </BaseLayout>
