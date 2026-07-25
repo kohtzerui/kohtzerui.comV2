@@ -1,29 +1,44 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import CollectionCard from '../components/CollectionCard.astro';
+
+const entries = (await getCollection('research', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+const tags = [...new Set(entries.flatMap((entry) => entry.data.tags))];
+const slugify = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 ---
 <BaseLayout title="Research" description="Ongoing questions, experiments, and reading trails by Koh Tze Rui." current="research">
   <main>
     <header class="page-head wrap reveal">
-      <p class="eyebrow">Research / Questions in motion</p>
+      <p class="eyebrow">Index / {String(entries.length).padStart(2, '0')} articles</p>
       <h1>What I'm<br /><em>looking into.</em></h1>
-      <p>Ongoing inquiries, experiments, and reading trails. These are living questions rather than polished answers.</p>
+      <p>Published research questions, experiments, and reading trails will appear here, ordered from newest to oldest.</p>
+      {tags.length > 0 && <div class="filter-row"><button class="filter-button active" data-filter="all">All research</button>{tags.map((tag) => <button class="filter-button" data-filter={slugify(tag)}>{tag}</button>)}</div>}
     </header>
 
-    <section class="identity-map wrap reveal" aria-label="Research identity map">
-      <div>
-        <p class="eyebrow">Research map / Core interests</p>
-        <h2>Where my interests overlap.</h2>
-        <p>My current centre of gravity sits between Artificial Intelligence, High Performance Computing, and Concurrency: understanding intelligent systems, making them fast, and reasoning about work that happens in parallel.</p>
-      </div>
-      <figure class="identity-mark">
-        <img src="/images/brand/research-venn-symbol-transparent.png" alt="Venn diagram logo showing Artificial Intelligence, High Performance Computing, and Concurrency as overlapping circles." loading="lazy" />
-      </figure>
-    </section>
-
-    <section class="project-list wrap">
-      <article class="project"><span class="project-num">01</span><div><h2>Visual explanations for AI systems</h2><p>How might spatial notes, diagrams, and progressive disclosure help technical readers reason about model behaviour?</p></div><span class="project-type">Active - Human-AI</span><span>-&gt;</span></article>
-      <article class="project"><span class="project-num">02</span><div><h2>High Performance Computing for AI</h2><p>Understanding how systems choices, memory movement, kernels, and parallelism shape the speed of model inference.</p></div><span class="project-type">Reading trail - HPC</span><span>-&gt;</span></article>
-      <article class="project"><span class="project-num">03</span><div><h2>Interfaces as learning environments</h2><p>Exploring how explanations and tooling can teach mental models without turning into instruction manuals.</p></div><span class="project-type">Writing - Design</span><span>-&gt;</span></article>
+    <section class="post-grid editorial-grid wrap" aria-label="Research articles">
+      {entries.length === 0 && <div class="collection-empty"><span class="eyebrow">Nothing published yet</span><h2>Research notes are being prepared.</h2><p>Questions and findings will appear here when they are ready to share.</p></div>}
+      {entries.map((entry, index) => {
+        const date = entry.data.publishedAt.toISOString().slice(0, 10);
+        const displayDate = entry.data.publishedAt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        const category = entry.data.tags.map(slugify).join('|');
+        return <CollectionCard
+          href={`/research/${entry.id}/`}
+          title={entry.data.title}
+          description={entry.data.description}
+          tags={entry.data.tags}
+          dateLabel={displayDate}
+          dateTime={date}
+          badge={entry.data.stage}
+          action="Read research"
+          cover={entry.data.cover}
+          coverAlt={`${entry.data.title} research cover`}
+          latest={index === 0}
+          category={category}
+          dataDate={date}
+        />;
+      })}
     </section>
   </main>
 </BaseLayout>

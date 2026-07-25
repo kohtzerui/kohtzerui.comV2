@@ -1,24 +1,45 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import CollectionCard from '../../components/CollectionCard.astro';
 
 const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
 const tags = [...new Set(posts.flatMap((post) => post.data.tags))];
 const slugify = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+const postCovers: Record<string, { src: string; alt: string }> = {
+  'ai-inference': {
+    src: '/images/blog/ai-inference-cover.png',
+    alt: 'Annotated overview of AI inference, including tokenization, embeddings, RoPE, attention, and attention scores.',
+  },
+};
 ---
 <BaseLayout title="Blog" description="Cornell-style notes on high performance computing, machine learning, and the systems between them." current="blog">
   <main>
     <header class="page-head wrap reveal"><p class="eyebrow">Index / {String(posts.length).padStart(2, '0')} notes</p><h1>The <em>notebook.</em></h1><p>Essays distilled into Cornell notes: cues and diagrams on the left, deeper thinking on the right, and a summary worth remembering.</p><div class="filter-row"><button class="filter-button active" data-filter="all">All notes</button>{tags.map((tag) => <button class="filter-button" data-filter={slugify(tag)}>{tag}</button>)}</div></header>
-    <section class="post-grid wrap" aria-label="Article summaries">
+    <section class="post-grid editorial-grid wrap" aria-label="Article summaries">
       {posts.map((post, index) => {
         const date = post.data.publishedAt.toISOString().slice(0, 10);
         const displayDate = post.data.publishedAt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
         const category = post.data.tags.map(slugify).join('|');
-        return <a class:list={['post-card', { featured: index === 0 }]} href={`/blog/${post.id}/`} data-category={category} data-date={date}>
-          <div class="post-card-content"><div class="post-meta"><span class="post-category">{post.data.tags.join(' - ')}</span><time datetime={date}>{displayDate}</time></div><h2>{post.data.title}</h2><p>{post.data.description}</p><div class="post-foot"><span class="tag">{post.data.chapter || post.data.readTime || 'Read'}</span><span>Read note -></span></div></div>
-          {post.id === 'ai-inference' && <div class="post-visual post-cover"><img src="/images/blog/ai-inference-cover.png" alt="Annotated handwritten overview of AI inference, including tokenization, embeddings, RoPE, attention, and attention scores." loading="lazy" /></div>}
-          {post.id === 'model-evaluation' && <div class="post-visual"><svg class="mini-diagram" viewBox="0 0 370 240" role="img" aria-label="Evaluation loop diagram"><circle cx="185" cy="120" r="42"/><circle cx="67" cy="67" r="33"/><circle cx="302" cy="62" r="33"/><circle cx="295" cy="187" r="33"/><circle cx="73" cy="188" r="33"/><path d="M96 79L145 103M223 99L273 76M225 143L267 171M145 143L101 171"/><text x="159" y="124">EVALUATE</text><text x="49" y="71">TASK</text><text x="281" y="66">DATA</text><text x="273" y="191">RUBRIC</text><text x="51" y="192">HUMAN</text></svg></div>}
-        </a>;
+        const cover = postCovers[post.id] ?? {
+          src: '/images/brand/research-venn-symbol.png',
+          alt: `${post.data.title} cover`,
+        };
+        return <CollectionCard
+          href={`/blog/${post.id}/`}
+          title={post.data.title}
+          description={post.data.description}
+          tags={post.data.tags}
+          dateLabel={displayDate}
+          dateTime={date}
+          badge={post.data.chapter || post.data.readTime || 'Read'}
+          action="Read note"
+          cover={cover.src}
+          coverAlt={cover.alt}
+          latest={index === 0}
+          category={category}
+          dataDate={date}
+        />;
       })}
     </section>
   </main>

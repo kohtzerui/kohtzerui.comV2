@@ -1,0 +1,324 @@
+---
+title: Optimising TowerMadness Zero World Record
+description: Profiling TowerMadness Zero's mechanics to turn a 2.4 million-point benchmark into a 7.95 million-point record.
+year: 2026
+publishedAt: 2026-07-16
+status: Shipped
+format: cornell
+tags:
+  - Gaming
+  - Game Mechanics
+featured: true
+cover: /images/side-projects/tower-madness-zero/01-cover.png
+draft: false
+---
+
+<CornellSection
+  cueLabel="The record"
+  cueTitle="2,407,148 points"
+  cueText="The free-to-play score that started the project."
+  cueImage="/images/side-projects/tower-madness-zero/01-cover.png"
+  cueImageAlt="Reddit post showing a claimed TowerMadness Zero world-record score of 2,407,148 points"
+  cueCaption="The Reddit post where I found the claimed world record."
+>
+
+## The challenge
+
+This side project was inspired by [a Reddit post](https://www.reddit.com/r/towermadness/s/WYZAevlv0y) I saw over the holidays. The player claimed the *TowerMadness Zero* free-to-play world record, without spending money on in-game add-ons, with a score of around **2,407,148 points**.
+
+This article covers how I profiled the gameplay and tackled the problem with an HPC engineer's mentality.
+
+</CornellSection>
+
+<CornellSection
+  cueLabel="Opening"
+  cueTitle="Protect the sheep"
+  cueText="Survive each wave, kill aliens, and keep the route to your sheep closed."
+>
+
+## What is TowerMadness?
+
+*TowerMadness* is a tower-defence survival game. The goal is simple: keep the aliens away from your sheep, which act as your lives, and survive for as long as possible. Killing more aliens and surviving boss levels earns more points and bonus points.
+
+The project was equally simple: **beat the TowerMadness Zero world record using everything available except paid add-ons.**
+
+</CornellSection>
+
+<CornellSection
+  cueLabel="Motivation"
+  cueTitle="Games as systems"
+  cueText="Can the way we reason about engineering systems also reveal a better game strategy?"
+>
+
+## Applying an HPC mindset
+
+I wanted to see how the way we think about games could connect to the mentality we use in HPC engineering, particularly how we analyse the mathematics, mechanics, and design of a system.
+
+</CornellSection>
+
+<CornellSection
+  cueLabel="Initial analysis"
+  cueTitle="Find the bottlenecks"
+  cueText="The previous record holder's map exposed unused space, low-density attacks, and missed opportunities to cluster enemies."
+  cueImage="/images/side-projects/tower-madness-zero/02-how-it-works.png"
+  cueImageAlt="The Lime map used by the previous TowerMadness Zero record holder"
+  cueCaption="The Lime map used for the previous record. Dirt paths and trees prevent towers from being built in those spaces."
+>
+
+## Three weaknesses in the previous strategy
+
+Given my experience with the game, I began by analysing the map used by the previous record holder. I spotted three weaknesses:
+
+1. **Tower choice.** The strategy prioritised missile towers and nukes, both of which have low attack density.
+2. **Fixed routing.** Following the map's fixed route created underused opportunities and dead space. Towers cannot be built on the dirt paths or trees shown in the image.
+3. **No alien batching.** The strategy did not cluster aliens to maximise the spread damage dealt by towers.
+
+### Working assumptions
+
+1. At the late-game stage, tower cost should not be the limiting factor because every tower will eventually be fully upgraded. **Usable space is the resource to optimise.**
+2. I assumed the previous world record was achieved on Easy mode. That was the only difficulty on which reaching several million points appeared feasible.
+
+</CornellSection>
+
+<CornellSection
+  cueLabel="Tower choice"
+  cueTitle="Prioritise damage density"
+  cueText="A high late-game score rewards towers that make the best use of every buildable tile."
+>
+
+## Rail guns for the ground, air defence for the sky
+
+The table compares each fully upgraded tower's damage per second and special effects.
+
+<div className="table-scroll">
+
+| Tower | Target | DPS | Special effect |
+| --- | --- | ---: | --- |
+| Stun gun | Air and ground | 7,125.2 | 35% chance of stunning for 4.75 seconds |
+| Laser gun | Air and ground | 7,783.6 | None |
+| Rail gun | Ground | 18,425 | Piercing damage along its line of fire |
+| Cannon | Air and ground | 1,118.7 | Splash damage and fixed burning damage |
+| Missile tower | Air and ground | 2,790 | Splash damage |
+| Air defence | Air | 23,500 | Splash damage |
+| Tesla tower | Ground | 11,768.6 | Attacks multiple enemies at once |
+| Boost tower | Non-attacking | 0 | Boosts adjacent towers by 240% |
+| Glue tower | Non-attacking | 0 | Slows enemies by 60% |
+
+</div>
+
+The rail gun appears to be the strongest choice for ground damage. It has the highest ground DPS and also produces piercing damage if the aliens can be lined up effectively.
+
+In this version of the game, cannon towers apply a fixed amount of burning damage rather than a percentage. That becomes negligible against high-level aliens with very large health pools.
+
+The strategy will therefore combine dedicated ground and air damage through **rail guns and air-defence towers**. This choice will heavily influence the map layout later.
+
+> **Version note:** *TowerMadness 2* significantly reduced the rail gun's damage.
+
+</CornellSection>
+
+<CornellSection
+  cueLabel="Boost mechanics"
+  cueTitle="Cluster for 19.2x damage"
+  cueText="A boost tower consumes one tile, but the 240% multiplier more than repays that cost."
+  cueImage="/images/side-projects/tower-madness-zero/03-boosting-tower-layout.png"
+  cueImageAlt="TowerMadness layout showing a boost tower affecting adjacent attacking towers"
+  cueCaption="A boost tower strengthening the adjacent damage-dealing towers."
+>
+
+## Why boosting is always worthwhile
+
+Assume each adjacent attacking tower deals **x** damage per second. With eight adjacent towers:
+
+> **Boosted damage = 8x &times; 240% = 19.2x**
+
+Placing a boost tower means sacrificing one tile that could otherwise hold an attacking tower. At a 240% boost, however, there is no configuration in which leaving the damage-dealing towers unboosted makes sense.
+
+The effect does not stack, so surrounding a single weapon with eight boost towers offers no additional benefit. Instead, the mechanic rewards the tightest possible clusters of attacking towers around each boost.
+
+> **Version note:** *TowerMadness 2* reduced the boost to 150%, making the trade-off more significant.
+
+</CornellSection>
+
+<CornellSection
+  cueLabel="Stun locking"
+  cueTitle="Control needs coverage"
+  cueText="More stun guns increase the chance of stopping a boss, but can also concentrate every weapon on the wrong part of the map."
+  cueImage="/images/side-projects/tower-madness-zero/04-alien-boss-stun-lock.png"
+  cueImageAlt="Alien boss stun-locked near the entry point of a TowerMadness map"
+  cueCaption="A boss stun-locked at the entry point, beyond the reach of most damage-dealing towers."
+>
+
+## The hidden cost of a stun lock
+
+Suppose there are four stun guns, each with a 35% probability of stunning an alien. The probability that at least one shot applies a stun is:
+
+> **P(at least one stun) = 1 - (0.65)^4, approximately 82%**
+
+That sounds ideal for boss rounds: adding more stun guns can keep a high-health alien almost permanently locked in place. In one attempt, however, it backfired.
+
+The stun guns' long range caused all of them to target a boss near the entrance, while only three rail guns could reach it. Until that boss died, the stun guns could not control anything else.
+
+**Takeaway:** stun locking is useful only when the surrounding damage towers can reach the same target. The stun guns should sit toward the back of the map so that they stop aliens inside the main damage zone.
+
+> **Version note:** *TowerMadness 2* addressed this by allowing towers to target the first, last, or strongest alien.
+
+</CornellSection>
+
+<CornellSection
+  cueLabel="Glue clustering"
+  cueTitle="Batch the wave"
+  cueText="Slowing the leading aliens lets the rest of the wave catch up, creating a denser target for splash damage."
+  cueImage="/images/side-projects/tower-madness-zero/05-batching-with-glue-gun.png"
+  cueImageAlt="TowerMadness aliens clustered together after passing glue guns"
+  cueCaption="Using glue guns to slow and batch aliens into a compact group."
+>
+
+## Increase the density of every shot
+
+This mechanic is straightforward. During a wave, once the first and last aliens come into contact with a glue gun, the slower leading aliens allow those behind them to catch up. The wave clusters together, enabling splash-damage towers to hit more aliens with each shot.
+
+The glue gun therefore provides two benefits: it increases the density of damage dealt in a region and buys more time to eliminate the wave.
+
+</CornellSection>
+
+<CornellSection
+  cueLabel="Map choice"
+  cueTitle="Optimise usable space"
+  cueText="An open map offers more buildable tiles and makes dense tower clusters possible."
+  cueImage="/images/side-projects/tower-madness-zero/06-selected-map.png"
+  cueImageAlt="The open TowerMadness map selected for the world-record attempts"
+  cueCaption="The map I selected for the record attempts."
+>
+
+## Routing starts with the map
+
+The strategy above, together with each tower's range, favours a very open map with little foliage, dirt, or structures. Every blocked tile reduces the proportion of attacking towers to boost towers and lowers the total damage density.
+
+The chosen map therefore needed to support two things:
+
+1. **The longest possible route for ground aliens**
+2. **Active rerouting during a wave**
+
+</CornellSection>
+
+<CornellSection
+  cueLabel="Passive routing"
+  cueTitle="Ground aliens take the maze"
+  cueText="Ground enemies follow the shortest open route; planes ignore it and fly directly toward the sheep."
+  cueImage="/images/side-projects/tower-madness-zero/07-pre-attempt-map-design.png"
+  cueImageAlt="Pre-attempt TowerMadness map showing passive routing and tower placement"
+  cueCaption="The map design before an attempt, with the plane route covered by air defence."
+>
+
+## One defence, two movement systems
+
+TowerMadness allows the player to route ground aliens. If towers block the shortest path, those aliens must reroute through the remaining opening.
+
+Planes are the harder constraint. They have more health and ignore every rerouting effort, flying directly toward the end zone. My placement therefore covers that direct flight path with as much air defence as possible, even though doing so weakens the ground defence.
+
+**The balancing problem:** maximise ground damage through routing while committing enough space to air defence, because planes will always be the limiting factor.
+
+</CornellSection>
+
+<CornellSection
+  cueLabel="Active routing"
+  cueTitle="Virtualise the ground damage"
+  cueText="Switching which path is open sends the same wave through the map twice, buying the damage side more time."
+  cueImage="/images/side-projects/tower-madness-zero/08-double-routing-map-design.png"
+  cueImageAlt="TowerMadness map annotated with damage and delay routes"
+  cueCaption="The double-routing design: damage route in red, delay route in purple."
+>
+
+## Force the wave to change direction
+
+The design contains two routes: a **damage side** and a **delay side**. By selling the stun gun at position 1 and placing another at position 2, I can close one route and force the ground aliens onto the other.
+
+The purple delay route is filled with stun guns and glue guns. At this stage it cannot kill the aliens by itself; its job is to buy time while the rail guns on the red damage route clear the enemies already there.
+
+Switching between the two paths lets the same ground-defence cluster serve the wave for longer, effectively virtualising the available damage.
+
+The painful part is timing. Each run takes around three hours before reaching the point where active routing becomes necessary and I have to pay close attention to every change.
+
+</CornellSection>
+
+<CornellSection
+  cueLabel="Final balance"
+  cueTitle="Air remains the constraint"
+  cueText="The final design combines a rail-gun damage side, dense air coverage, and a layered delay route."
+  cueImage="/images/side-projects/tower-madness-zero/09-final-map-considerations.png"
+  cueImageAlt="Final TowerMadness map annotated with ground damage, air defence, and delay regions"
+  cueCaption="The final map considerations and coverage regions."
+>
+
+## Bringing every mechanic together
+
+The last difficult factor is balancing the maximum amount of air defence, which remains the limiting factor, with enough rail guns to clear the ground aliens routed through the damage side.
+
+- **Ground-damage side:** maximise the number of rail guns. Four stun guns near the bottom provide effective boss stun locking only after a boss has crossed the main damage field.
+- **Air-defence side:** keep the planes' direct path inside the red region covered by the air-defence towers.
+- **Delay side:** layer the stun and glue towers so they can also slow boss planes and ordinary planes long enough for the air defence to finish them.
+
+One limitation remained: I could not safely reroute during a plane round. Ground aliens would occupy the stun guns' targeting, allowing the planes to pass without being stunned. That was a mistake I did not fully optimise out of the final run.
+
+</CornellSection>
+
+<CornellSection
+  cueLabel="Results"
+  cueTitle="Three record attempts"
+  cueText="Every run exposed a new bottleneck and pushed the score higher."
+  cueImage="/images/side-projects/tower-madness-zero/10-attempt-1-score.png"
+  cueImageAlt="TowerMadness attempt one final score of 4,944,457 points"
+  cueCaption="Attempt 1: 4,944,457 points."
+  cueImage2="/images/side-projects/tower-madness-zero/11-attempt-2-score.png"
+  cueImage2Alt="TowerMadness attempt two final score of 5,599,478 points"
+  cueImage2Caption="Attempt 2: 5,599,478 points."
+  cueImage3="/images/side-projects/tower-madness-zero/12-attempt-3-score.png"
+  cueImage3Alt="TowerMadness attempt three final score of 7,949,710 points"
+  cueImage3Caption="Attempt 3: 7,949,710 points."
+>
+
+## From 2.4 million to 7.95 million
+
+Each attempt revealed problems that shaped the next map: poor routing, insufficient air-defence coverage, and an incomplete double-routing design.
+
+<div className="table-scroll">
+
+| Run | Score | Improvement over benchmark |
+| --- | ---: | ---: |
+| Previous benchmark | 2,407,148 | 0% |
+| Attempt 1 | 4,944,457 | 105.4% |
+| Attempt 2 | 5,599,478 | 132.6% |
+| Attempt 3 | **7,949,710** | **230.3%** |
+
+</div>
+
+<div className="result-callout">The final score was 3.3 times the previous benchmark.</div>
+
+<figure className="note-figure">
+  <img src="/images/side-projects/tower-madness-zero/13-final-annotated-map.png" alt="Final annotated TowerMadness map showing the damage, delay, and air-defence regions" loading="lazy" />
+  <figcaption>The final annotated map used for the third attempt.</figcaption>
+</figure>
+
+I first lost a sheep at around 7.1 million points because of poor active routing.
+
+I completed all three attempts while travelling overseas. Repeating the experiment in Singapore would be difficult to justify casually: every serious run takes roughly three hours before reaching the stage where the routing decisions become demanding.
+
+</CornellSection>
+
+<CornellSection
+  cueLabel="Evaluation"
+  cueTitle="Record beaten, system unfinished"
+  cueText="The final run exceeded the benchmark by 230%, but the analysis still points to several ways the strategy could improve."
+>
+
+## What I would optimise next
+
+The previous record was beaten by more than threefold, but I think the strategy still has room to improve:
+
+1. **Test a larger map.** Larger maps usually have poorer tower density, but their longer direct route could give air defence more time to attack planes.
+2. **Refine the tower placement.** The final attempt revealed several small positioning decisions that were not optimal.
+3. **Keep learning from the community.** TowerMadness has a small community, but the deleted Reddit user's post was enough to send me down this wonderful rabbit hole.
+
+Either way, I thoroughly enjoyed being a try-hard gamer and profiling the game as an engineering system.
+
+</CornellSection>

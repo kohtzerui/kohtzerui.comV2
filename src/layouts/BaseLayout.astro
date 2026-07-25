@@ -1,5 +1,5 @@
 ---
-interface Props { title: string; description?: string; current?: 'blog' | 'research' | 'portfolio' | 'about'; }
+interface Props { title: string; description?: string; current?: 'blog' | 'reflections' | 'research' | 'portfolio' | 'side-projects' | 'about'; }
 const { title, description = 'Research, notes, and selected work by Koh Tze Rui.', current } = Astro.props;
 ---
 <!doctype html>
@@ -10,6 +10,7 @@ const { title, description = 'Research, notes, and selected work by Koh Tze Rui.
   <meta name="description" content={description} />
   <title>{title} — Koh Tze Rui</title>
   <link rel="stylesheet" href="/assets/site.css" />
+  <link rel="stylesheet" href="/assets/collection-cards.css" />
   <script is:inline defer src="/assets/site.js"></script>
 </head>
 <body>
@@ -17,10 +18,12 @@ const { title, description = 'Research, notes, and selected work by Koh Tze Rui.
     <a class="brand" href="/"><span class="brand-mark">F/N</span><span>FIELDNOTES</span></a>
     <button class="menu-button" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
     <nav id="site-nav" class="site-nav" aria-label="Primary navigation">
-      <a aria-current={current === 'blog' ? 'page' : undefined} href="/blog/">Blog</a>
-      <a aria-current={current === 'research' ? 'page' : undefined} href="/research/">Research</a>
-      <a aria-current={current === 'portfolio' ? 'page' : undefined} href="/portfolio/">Portfolio</a>
       <a aria-current={current === 'about' ? 'page' : undefined} href="/about/">About</a>
+      <a aria-current={current === 'portfolio' ? 'page' : undefined} href="/portfolio/">Portfolio</a>
+      <a aria-current={current === 'research' ? 'page' : undefined} href="/research/">Research</a>
+      <a aria-current={current === 'side-projects' ? 'page' : undefined} href="/side-projects/">Side Project</a>
+      <a aria-current={current === 'blog' ? 'page' : undefined} href="/blog/">Blog</a>
+      <a aria-current={current === 'reflections' ? 'page' : undefined} href="/reflections/">Reflections</a>
     </nav>
   </header>
   <slot />

@@ -1,0 +1,15 @@
+---
+import { getCollection, render } from 'astro:content';
+import ReflectionPost from '../../layouts/ReflectionPost.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('reflections', ({ data }) => !data.draft);
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+<ReflectionPost post={post}>
+  <Content />
+</ReflectionPost>

@@ -1,0 +1,53 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CollectionCard from '../../components/CollectionCard.astro';
+
+const projects = (await getCollection('sideProjects', ({ data }) => !data.draft))
+  .sort((a, b) => {
+    const aDate = a.data.publishedAt?.valueOf() ?? Date.UTC(a.data.year, 0, 1);
+    const bDate = b.data.publishedAt?.valueOf() ?? Date.UTC(b.data.year, 0, 1);
+    return bDate - aDate;
+  });
+const tags = [...new Set(projects.flatMap((project) => project.data.tags))];
+const slugify = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+---
+<BaseLayout title="Side Projects" description="Experiments and independent work beyond HPC, AI, and concurrency." current="side-projects">
+  <main>
+    <header class="page-head wrap reveal">
+      <p class="eyebrow">Index / {String(projects.length).padStart(2, '0')} projects</p>
+      <h1>Made out of<br /><em>curiosity.</em></h1>
+      <p>Experiments, games, tools, and independent work. The newest project is always placed first.</p>
+      {tags.length > 0 && <div class="filter-row"><button class="filter-button active" data-filter="all">All projects</button>{tags.map((tag) => <button class="filter-button" data-filter={slugify(tag)}>{tag}</button>)}</div>}
+    </header>
+
+    <section class="post-grid editorial-grid wrap" aria-label="Side projects">
+      {projects.length === 0 && <div class="collection-empty"><span class="eyebrow">Nothing published yet</span><h2>Your next side project will appear here.</h2><p>Published projects are ordered automatically by date.</p></div>}
+      {projects.map((project, index) => {
+        const publishedAt = project.data.publishedAt ?? new Date(Date.UTC(project.data.year, 0, 1));
+        const date = publishedAt.toISOString().slice(0, 10);
+        const displayDate = project.data.publishedAt
+          ? publishedAt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+          : String(project.data.year);
+        const category = project.data.tags.map(slugify).join('|');
+        const cover = project.data.cover ?? '/images/brand/research-venn-symbol.png';
+        return <CollectionCard
+          href={`/side-projects/${project.id}/`}
+          title={project.data.title}
+          description={project.data.description}
+          tags={project.data.tags}
+          dateLabel={displayDate}
+          dateTime={date}
+          badge={project.data.status}
+          action="View project"
+          cover={cover}
+          coverAlt={`${project.data.title} project cover`}
+          coverPosition={project.id === 'tower-madness-zero-world-record' ? 'top' : 'center'}
+          latest={index === 0}
+          category={category}
+          dataDate={date}
+        />;
+      })}
+    </section>
+  </main>
+</BaseLayout>

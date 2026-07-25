@@ -1,0 +1,15 @@
+---
+import { getCollection, render } from 'astro:content';
+import CollectionPost from '../../layouts/CollectionPost.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('research', ({ data }) => !data.draft);
+  return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+<CollectionPost entry={entry} sectionTitle="Research" sectionHref="/research/" current="research" badge={entry.data.stage}>
+  <Content />
+</CollectionPost>

@@ -1,0 +1,31 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  entry: any;
+  sectionTitle: string;
+  sectionHref: string;
+  current: 'portfolio' | 'research';
+  badge: string;
+}
+
+const { entry, sectionTitle, sectionHref, current, badge } = Astro.props;
+const { title, description, publishedAt, tags, externalUrl } = entry.data;
+const date = publishedAt.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+---
+<BaseLayout title={title} description={description} current={current}>
+  <main class="wrap reflection-page">
+    <header class="article-head reveal reflection-head">
+      <p class="article-kicker"><a href={sectionHref}>&larr; All {sectionTitle.toLowerCase()}</a><span>&bull;</span><span>{badge}</span><span>&bull;</span><time datetime={publishedAt.toISOString()}>{date}</time></p>
+      <h1>{title}</h1>
+      <p class="article-deck">{description}</p>
+      <div class="project-detail-actions">
+        {tags.length > 0 && <div class="desk-tags">{tags.map((tag: string) => <span>{tag}</span>)}</div>}
+        {externalUrl && <a class="button button-dark" href={externalUrl} target="_blank" rel="noreferrer">Visit project <span aria-hidden="true">&nearr;</span></a>}
+      </div>
+    </header>
+    <article class="reflection-prose">
+      <slot />
+    </article>
+  </main>
+</BaseLayout>

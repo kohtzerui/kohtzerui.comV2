@@ -1,18 +1,44 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import CollectionCard from '../components/CollectionCard.astro';
+
+const entries = (await getCollection('portfolio', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+const tags = [...new Set(entries.flatMap((entry) => entry.data.tags))];
+const slugify = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 ---
 <BaseLayout title="Portfolio" description="Selected work by Koh Tze Rui." current="portfolio">
   <main>
     <header class="page-head wrap reveal">
-      <p class="eyebrow">Portfolio / Selected work</p>
+      <p class="eyebrow">Index / {String(entries.length).padStart(2, '0')} projects</p>
       <h1>Made with<br /><em>purpose.</em></h1>
-      <p>A small selection of research, systems, and product work. Each project began with a question, not a feature list.</p>
+      <p>Published project case studies will appear here, ordered from newest to oldest.</p>
+      {tags.length > 0 && <div class="filter-row"><button class="filter-button active" data-filter="all">All projects</button>{tags.map((tag) => <button class="filter-button" data-filter={slugify(tag)}>{tag}</button>)}</div>}
     </header>
 
-    <section class="project-list wrap">
-      <article class="project"><span class="project-num">01</span><div><h2>AI inference notes</h2><p>A visual Cornell-note style explanation of what happens after a model is trained, from prefill to decoding.</p><div class="desk-tags"><span>LLMs</span><span>Visual explanation</span></div></div><span class="project-type">Write-up · 2026</span><span>↗</span></article>
-      <article class="project"><span class="project-num">02</span><div><h2>AI-HPC optimisation practice</h2><p>Learning how to reason about model inference performance through Qwen optimisation work and systems experiments.</p><div class="desk-tags"><span>HPC</span><span>Inference</span></div></div><span class="project-type">Work in progress · 2026</span><span>↗</span></article>
-      <article class="project"><span class="project-num">03</span><div><h2>Fieldnotes website</h2><p>A personal portfolio and mental notebook designed around visual technical writing and reusable learning paths.</p><div class="desk-tags"><span>Astro</span><span>Writing system</span></div></div><span class="project-type">Website · 2026</span><span>↗</span></article>
+    <section class="post-grid editorial-grid wrap" aria-label="Portfolio projects">
+      {entries.length === 0 && <div class="collection-empty"><span class="eyebrow">Nothing published yet</span><h2>Portfolio case studies are being prepared.</h2><p>Projects will appear here when they are ready to share.</p></div>}
+      {entries.map((entry, index) => {
+        const date = entry.data.publishedAt.toISOString().slice(0, 10);
+        const displayDate = entry.data.publishedAt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        const category = entry.data.tags.map(slugify).join('|');
+        return <CollectionCard
+          href={`/portfolio/${entry.id}/`}
+          title={entry.data.title}
+          description={entry.data.description}
+          tags={entry.data.tags}
+          dateLabel={displayDate}
+          dateTime={date}
+          badge={entry.data.status}
+          action="View project"
+          cover={entry.data.cover}
+          coverAlt={`${entry.data.title} project cover`}
+          latest={index === 0}
+          category={category}
+          dataDate={date}
+        />;
+      })}
     </section>
   </main>
 </BaseLayout>
