@@ -1,0 +1,42 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const posts = (await getCollection('reflections', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+const tags = [...new Set(posts.flatMap((post) => post.data.tags))];
+const slugify = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+---
+<BaseLayout title="Reflections" description="Shorter, more personal notes on learning, making, and paying attention." current="reflections">
+  <main>
+    <header class="page-head wrap reveal">
+      <p class="eyebrow">Index / {String(posts.length).padStart(2, '0')} reflections</p>
+      <h1>Notes from<br /><em>the margins.</em></h1>
+      <p>Shorter, more personal notes on learning, making, and paying attention. The newest reflection is always placed first.</p>
+      {tags.length > 0 && <div class="filter-row"><button class="filter-button active" data-filter="all">All reflections</button>{tags.map((tag) => <button class="filter-button" data-filter={slugify(tag)}>{tag}</button>)}</div>}
+    </header>
+
+    <section class="reflection-list wrap" aria-label="Reflections">
+      {posts.length === 0 && <div class="collection-empty"><span class="eyebrow">Nothing published yet</span><h2>Your first reflection will appear here.</h2><p>No sample entries are being shown.</p></div>}
+      {posts.map((post, index) => {
+        const date = post.data.publishedAt.toISOString().slice(0, 10);
+        const category = post.data.tags.map(slugify).join('|');
+        return <a class="reflection-row" href={'/reflections/' + post.id + '/'} data-category={category} data-date={date}>
+          <span class="project-num">{String(index + 1).padStart(2, '0')}</span>
+          <div class="reflection-row-copy">
+            <h2>{post.data.title}</h2>
+            <p>{post.data.description}</p>
+          </div>
+          <span aria-hidden="true">&rarr;</span>
+        </a>;
+      })}
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  .reflection-row-copy {
+    display: grid;
+    gap: 10px;
+  }
+</style>

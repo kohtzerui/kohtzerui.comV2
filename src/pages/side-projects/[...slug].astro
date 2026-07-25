@@ -1,0 +1,16 @@
+---
+import { getCollection, render } from 'astro:content';
+import SideProjectPost from '../../layouts/SideProjectPost.astro';
+import CornellSection from '../../components/CornellSection.astro';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('sideProjects', ({ data }) => !data.draft);
+  return projects.map((project) => ({ params: { slug: project.id }, props: { project } }));
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+---
+<SideProjectPost project={project}>
+  <Content components={{ CornellSection }} />
+</SideProjectPost>

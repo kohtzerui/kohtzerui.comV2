@@ -1,0 +1,54 @@
+---
+interface Props {
+  href: string;
+  title: string;
+  description: string;
+  tags: string[];
+  dateLabel: string;
+  dateTime?: string;
+  badge: string;
+  action: string;
+  cover: string;
+  coverAlt: string;
+  latest?: boolean;
+  category?: string;
+  dataDate?: string;
+  coverPosition?: 'center' | 'top';
+}
+
+const {
+  href,
+  title,
+  description,
+  tags,
+  dateLabel,
+  dateTime,
+  badge,
+  action,
+  cover,
+  coverAlt,
+  latest = false,
+  category,
+  dataDate,
+  coverPosition = 'center',
+} = Astro.props;
+---
+<a
+  class:list={['post-card', 'collection-card', 'editorial-card', { featured: latest }]}
+  href={href}
+  data-category={category}
+  data-date={dataDate}
+>
+  <div class="post-card-content">
+    <div class="post-meta">
+      <span class="post-category">{tags.join(' - ')}</span>
+      {dateTime ? <time datetime={dateTime}>{dateLabel}</time> : <span>{dateLabel}</span>}
+    </div>
+    <h2>{title}</h2>
+    <p>{description}</p>
+    <div class="post-foot"><span class="tag">{badge}</span><span>{action} →</span></div>
+  </div>
+  <div class:list={['post-visual', 'post-cover', { 'focus-top': coverPosition === 'top' }]}>
+    <img src={cover} alt={coverAlt} loading="lazy" width="1280" height="903" />
+  </div>
+</a>

@@ -1,5 +1,51 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+const [blogPosts, reflections, sideProjects, portfolioEntries, researchEntries] = await Promise.all([
+  getCollection('blog', ({ data }) => !data.draft),
+  getCollection('reflections', ({ data }) => !data.draft),
+  getCollection('sideProjects', ({ data }) => !data.draft),
+  getCollection('portfolio', ({ data }) => !data.draft),
+  getCollection('research', ({ data }) => !data.draft),
+]);
+
+const recentItems = [
+  ...blogPosts.map((entry) => ({
+    title: entry.data.title,
+    href: `/blog/${entry.id}/`,
+    category: 'Blog',
+    publishedAt: entry.data.publishedAt,
+  })),
+  ...reflections.map((entry) => ({
+    title: entry.data.title,
+    href: `/reflections/${entry.id}/`,
+    category: 'Reflection',
+    publishedAt: entry.data.publishedAt,
+  })),
+  ...sideProjects.map((entry) => ({
+    title: entry.data.title,
+    href: `/side-projects/${entry.id}/`,
+    category: 'Side project',
+    publishedAt: entry.data.publishedAt ?? new Date(Date.UTC(entry.data.year, 0, 1)),
+  })),
+  ...portfolioEntries.map((entry) => ({
+    title: entry.data.title,
+    href: `/portfolio/${entry.id}/`,
+    category: 'Portfolio',
+    publishedAt: entry.data.publishedAt,
+  })),
+  ...researchEntries.map((entry) => ({
+    title: entry.data.title,
+    href: `/research/${entry.id}/`,
+    category: 'Research',
+    publishedAt: entry.data.publishedAt,
+  })),
+]
+  .sort((a, b) => b.publishedAt.valueOf() - a.publishedAt.valueOf())
+  .slice(0, 3);
+
+const formatDate = (date: Date) => date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 ---
 <BaseLayout title="Home" description="A quiet portfolio for research, writing, and work in progress.">
   <main>
@@ -30,7 +76,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <em>25 seconds</em>
           </div>
           <div class="latency-row">
-            <span>CA -> Netherlands -> CA</span>
+            <span>CA -&gt; Netherlands -&gt; CA</span>
             <strong>~150,000,000 ns</strong>
             <em>5 years</em>
           </div>
@@ -48,19 +94,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     <section class="wrap section-grid">
       <div>
-        <p class="eyebrow">From the notebook</p>
+        <p class="eyebrow">Across every collection</p>
         <h2>Recent thinking</h2>
       </div>
       <div class="feature-list">
-        <a class="feature-row" href="/blog/ai-inference/">
-          <span class="feature-num">01</span><span><strong>AI Inference: What happens after the model is trained?</strong><small>Foundational &middot; 10 min read</small></span><span class="arrow">-&gt;</span>
-        </a>
-        <a class="feature-row" href="/blog/model-evaluation/">
-          <span class="feature-num">02</span><span><strong>Evaluating AI without fooling ourselves</strong><small>Systems &middot; 8 min read</small></span><span class="arrow">-&gt;</span>
-        </a>
-        <a class="feature-row" href="/research/">
-          <span class="feature-num">03</span><span><strong>Reading interfaces as arguments</strong><small>Research &middot; 11 min read</small></span><span class="arrow">-&gt;</span>
-        </a>
+        {recentItems.map((item, index) => <a class="feature-row" href={item.href}>
+          <span class="feature-num">{String(index + 1).padStart(2, '0')}</span>
+          <span><strong>{item.title}</strong><small>{item.category} &middot; {formatDate(item.publishedAt)}</small></span>
+          <span class="arrow">&rarr;</span>
+        </a>)}
+        {recentItems.length === 0 && <p>No articles have been published yet.</p>}
       </div>
     </section>
   </main>
