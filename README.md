@@ -36,7 +36,7 @@ npm run dev
 
 Open `http://localhost:4173`.
 
-Netlify's Vite plugin runs the like-counter function at `/api/likes` during normal Astro development. When Redis credentials are absent, local likes are stored in the operating system's temporary directory.
+Netlify's Vite plugin runs the like-counter function and a sandboxed local Blob store during normal Astro development. Local counter data is separate from production data.
 
 ## Production
 
@@ -48,16 +48,4 @@ npm run build
 
 ## Article like counter
 
-The duck button uses `api/likes.js` and Upstash Redis to keep a shared count for each article. A session-only, HTTP-only cookie prevents the same browser session from incrementing an article more than once.
-
-1. Create an Upstash Redis database.
-2. Add these variables in Netlify under Project configuration > Environment variables, with access to Functions:
-
-```text
-UPSTASH_REDIS_REST_URL
-UPSTASH_REDIS_REST_TOKEN
-```
-
-3. Redeploy the site after setting the variables.
-
-To test against the real Redis database locally, copy `.env.example` to `.env`, fill in the values, and run `npm run dev`. Use the standard REST token only as a server-side environment variable; never expose it in browser code.
+The duck button uses `api/likes.js` and Netlify Blobs to keep a shared count for each article. Netlify provisions the production store automatically, so no database credentials are required. A session-only, HTTP-only cookie prevents the same browser session from incrementing an article more than once.

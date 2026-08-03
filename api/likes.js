@@ -1,63 +1,13 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { getStore } from '@netlify/blobs';
 
 const SESSION_COOKIE = 'duck_like_session';
-const SESSION_DEDUPE_TTL_SECONDS = 60 * 60 * 24 * 30;
-const LOCAL_STORE_PATH = join(tmpdir(), 'kohtzerui-duck-likes-local.json');
-
-const LIKE_SCRIPT = `
-  local inserted = redis.call('SET', KEYS[1], '1', 'NX', 'EX', ARGV[1])
-  if inserted then
-    local count = redis.call('INCR', KEYS[2])
-    return {1, count}
-  end
-
-  local count = redis.call('GET', KEYS[2])
-  return {0, tonumber(count) or 0}
-`;
-
-function hasRedisConfig() {
-  return Boolean(
-    process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN,
-  );
-}
+const STORE_NAME = 'duck-article-likes';
 
 function json(data, init = {}) {
   const headers = new Headers(init.headers);
   headers.set('Content-Type', 'application/json; charset=utf-8');
   headers.set('Cache-Control', 'no-store');
   return new Response(JSON.stringify(data), { ...init, headers });
-}
-
-function getRedisConfig() {
-  const url = process.env.UPSTASH_REDIS_REST_URL?.replace(/\/$/, '');
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-
-  if (!url || !token) {
-    throw new Error('Like storage is not configured.');
-  }
-
-  return { url, token };
-}
-
-async function redisRequest(path, command) {
-  const { url, token } = getRedisConfig();
-  const response = await fetch(`${url}${path}`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(command),
-  });
-
-  const payload = await response.json();
-  if (!response.ok || payload?.error) {
-    throw new Error(payload?.error || 'Redis request failed.');
-  }
-
-  return payload;
 }
 
 function normalizeArticle(value) {
@@ -81,83 +31,60 @@ function readSessionId(request) {
   return /^[0-9a-f-]{36}$/i.test(value) ? value : null;
 }
 
+function articleKey(article) {
+  return encodeURIComponent(article);
+}
+
 function counterKey(article) {
-  return `duck-likes:count:${article}`;
+  return `count:${articleKey(article)}`;
 }
 
 function sessionKey(article, sessionId) {
-  return `duck-likes:session:${sessionId}:${article}`;
+  return `session:${articleKey(article)}:${sessionId}`;
+}
+
+function openLikeStore() {
+  return getStore({ name: STORE_NAME, consistency: 'strong' });
+}
+
+function parseCount(value) {
+  const count = Number.parseInt(value || '0', 10);
+  return Number.isSafeInteger(count) && count >= 0 ? count : 0;
 }
 
 async function readLikeState(article, sessionId) {
-  const commands = [['GET', counterKey(article)]];
+  const store = openLikeStore();
+  const [countValue, sessionLike] = await Promise.all([
+    store.get(counterKey(article)),
+    sessionId ? store.get(sessionKey(article, sessionId)) : null,
+  ]);
 
-  if (sessionId) {
-    commands.push(['EXISTS', sessionKey(article, sessionId)]);
-  }
-
-  const results = await redisRequest('/pipeline', commands);
-  const count = Number(results[0]?.result || 0);
-  const liked = sessionId ? Number(results[1]?.result || 0) === 1 : false;
-
-  return { count, liked };
+  return { count: parseCount(countValue), liked: sessionLike !== null };
 }
 
 async function addLike(article, sessionId) {
-  const payload = await redisRequest('', [
-    'EVAL',
-    LIKE_SCRIPT,
-    2,
-    sessionKey(article, sessionId),
-    counterKey(article),
-    SESSION_DEDUPE_TTL_SECONDS,
+  const store = openLikeStore();
+  const likeKey = sessionKey(article, sessionId);
+  const existingLike = await store.get(likeKey);
+  const accepted = existingLike === null;
+
+  if (!accepted) {
+    return {
+      accepted: false,
+      count: parseCount(await store.get(counterKey(article))),
+      liked: true,
+    };
+  }
+
+  const currentCount = parseCount(await store.get(counterKey(article)));
+  const count = currentCount + 1;
+
+  await Promise.all([
+    store.set(likeKey, new Date().toISOString()),
+    store.set(counterKey(article), String(count)),
   ]);
 
-  const [accepted, count] = payload.result || [0, 0];
-  return { accepted: accepted === 1, count: Number(count || 0), liked: true };
-}
-
-function shouldUseLocalStore(request) {
-  const hostname = new URL(request.url).hostname;
-  return !hasRedisConfig() && (hostname === 'localhost' || hostname === '127.0.0.1');
-}
-
-async function readLocalStore() {
-  try {
-    return JSON.parse(await readFile(LOCAL_STORE_PATH, 'utf8'));
-  } catch (error) {
-    if (error?.code !== 'ENOENT') {
-      console.warn('Could not read the local duck-like store:', error);
-    }
-    return { counts: {}, sessions: {} };
-  }
-}
-
-async function writeLocalStore(store) {
-  await mkdir(dirname(LOCAL_STORE_PATH), { recursive: true });
-  await writeFile(LOCAL_STORE_PATH, JSON.stringify(store, null, 2), 'utf8');
-}
-
-async function readLocalLikeState(article, sessionId) {
-  const store = await readLocalStore();
-  return {
-    count: Number(store.counts[article] || 0),
-    liked: sessionId ? store.sessions[sessionKey(article, sessionId)] === true : false,
-  };
-}
-
-async function addLocalLike(article, sessionId) {
-  const store = await readLocalStore();
-  const key = sessionKey(article, sessionId);
-  const accepted = store.sessions[key] !== true;
-
-  if (accepted) {
-    store.sessions[key] = true;
-    store.counts[article] = Number(store.counts[article] || 0) + 1;
-    await writeLocalStore(store);
-  }
-
-  return { accepted, count: Number(store.counts[article] || 0), liked: true };
+  return { accepted: true, count, liked: true };
 }
 
 export default async function handler(request) {
@@ -169,22 +96,14 @@ export default async function handler(request) {
   }
 
   try {
-    const useLocalStore = shouldUseLocalStore(request);
-
     if (request.method === 'GET') {
-      const sessionId = readSessionId(request);
-      const state = useLocalStore
-        ? await readLocalLikeState(article, sessionId)
-        : await readLikeState(article, sessionId);
-      return json(state);
+      return json(await readLikeState(article, readSessionId(request)));
     }
 
     if (request.method === 'POST') {
       const existingSessionId = readSessionId(request);
       const sessionId = existingSessionId || crypto.randomUUID();
-      const result = useLocalStore
-        ? await addLocalLike(article, sessionId)
-        : await addLike(article, sessionId);
+      const result = await addLike(article, sessionId);
       const headers = new Headers();
 
       if (!existingSessionId) {
