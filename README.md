@@ -27,6 +27,8 @@ The blog index is generated automatically. The newest `publishedAt` date becomes
 
 ## Local preview
 
+Install the dependencies and start Astro:
+
 ```powershell
 npm install
 npm run dev
@@ -34,10 +36,28 @@ npm run dev
 
 Open `http://localhost:4173`.
 
+Netlify's Vite plugin runs the like-counter function at `/api/likes` during normal Astro development. When Redis credentials are absent, local likes are stored in the operating system's temporary directory.
+
 ## Production
 
 ```powershell
 npm run build
 ```
 
-Vercel detects Astro and publishes the generated `dist/` site.
+`netlify.toml` configures Netlify to publish `dist/` and deploy functions from `api/`.
+
+## Article like counter
+
+The duck button uses `api/likes.js` and Upstash Redis to keep a shared count for each article. A session-only, HTTP-only cookie prevents the same browser session from incrementing an article more than once.
+
+1. Create an Upstash Redis database.
+2. Add these variables in Netlify under Project configuration > Environment variables, with access to Functions:
+
+```text
+UPSTASH_REDIS_REST_URL
+UPSTASH_REDIS_REST_TOKEN
+```
+
+3. Redeploy the site after setting the variables.
+
+To test against the real Redis database locally, copy `.env.example` to `.env`, fill in the values, and run `npm run dev`. Use the standard REST token only as a server-side environment variable; never expose it in browser code.

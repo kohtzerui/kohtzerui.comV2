@@ -1,0 +1,47 @@
+<div class="duck-like">
+  <p class="duck-like__prompt">If you found this article helpful, I&rsquo;d appreciate it if you clicked the duck!</p>
+  <button
+    class="duck-like__button"
+    type="button"
+    data-duck-like
+    aria-label="Like this article"
+    aria-pressed="false"
+  >
+    <svg
+      class="duck-like__icon"
+      viewBox="0 0 260 260"
+      role="img"
+      aria-labelledby="duck-like-title"
+      shape-rendering="crispEdges"
+    >
+      <title id="duck-like-title">A pixel-art duck</title>
+      <g class="duck-like__body">
+        <rect x="60" y="0" width="80" height="20" />
+        <rect x="40" y="20" width="120" height="20" />
+        <rect x="40" y="40" width="120" height="20" />
+        <rect x="60" y="60" width="100" height="20" />
+        <rect x="60" y="80" width="100" height="20" />
+        <rect x="80" y="100" width="60" height="20" />
+        <rect x="60" y="120" width="200" height="20" />
+        <rect x="40" y="140" width="220" height="20" />
+        <rect x="40" y="160" width="200" height="20" />
+        <rect x="60" y="180" width="160" height="20" />
+        <rect x="80" y="200" width="100" height="20" />
+      </g>
+      <g class="duck-like__beak">
+        <rect x="0" y="60" width="60" height="20" />
+        <rect x="20" y="80" width="40" height="20" />
+      </g>
+      <rect class="duck-like__eye" x="80" y="40" width="20" height="20" />
+      <g class="duck-like__leg">
+        <rect x="120" y="220" width="20" height="20" />
+        <rect x="100" y="240" width="40" height="20" />
+      </g>
+    </svg>
+  </button>
+  <span class="duck-like__count" aria-live="polite">
+    <strong data-duck-like-count>&mdash;</strong>
+    <span data-duck-like-count-label>likes</span>
+  </span>
+  <span class="visually-hidden" data-duck-like-status aria-live="polite"></span>
+</div>
