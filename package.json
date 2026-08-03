@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@astrojs/mdx": "latest",
+    "@netlify/blobs": "^10.7.11",
     "astro": "latest"
   },
   "devDependencies": {
