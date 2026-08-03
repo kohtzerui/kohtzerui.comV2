@@ -10,5 +10,8 @@
   "dependencies": {
     "@astrojs/mdx": "latest",
     "astro": "latest"
+  },
+  "devDependencies": {
+    "@netlify/vite-plugin": "^2.12.9"
   }
 }

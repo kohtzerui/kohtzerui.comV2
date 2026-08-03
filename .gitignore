@@ -1,6 +1,7 @@
 # Local Codex working folders
 work/
 outputs/
+.netlify/
 
 # OS and editor files
 .DS_Store

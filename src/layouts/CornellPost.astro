@@ -1,5 +1,6 @@
 ---
 import BaseLayout from './BaseLayout.astro';
+import DuckLike from '../components/DuckLike.astro';
 const { post } = Astro.props;
 const { title, description, publishedAt, tags, readTime, summary, references } = post.data;
 const date = publishedAt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -14,7 +15,13 @@ const date = publishedAt.toLocaleDateString('en-GB', { day: '2-digit', month: 's
     </header>
     <article class="cornell-sheet">
       <slot />
-      <footer class="note-summary"><span class="cue-label">Summary / take this with you</span><p>{summary}</p></footer>
+      <footer class="note-summary">
+        <span class="cue-label">Summary / take this with you</span>
+        <div class="note-summary__content">
+          <DuckLike />
+          <p class="note-summary__text">{summary}</p>
+        </div>
+      </footer>
       {references.length > 0 && <section class="note-references"><span class="cue-label">Citations &amp; references</span><h2>Continue exploring</h2><p class="reference-key">V / B / P = Video / Blog / Paper</p><ol>{references.map((reference: {type:string;title:string;url:string}) => <li><span>{reference.type}</span><a href={reference.url} target="_blank" rel="noreferrer">{reference.title}</a></li>)}</ol></section>}
     </article>
   </main>
