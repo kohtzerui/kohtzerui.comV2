@@ -7,6 +7,10 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort((a, 
 const tags = [...new Set(posts.flatMap((post) => post.data.tags))];
 const slugify = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 const postCovers: Record<string, { src: string; alt: string }> = {
+  'hpc-tech-stack': {
+    src: '/images/blog/hpc-tech-stack-cover.png',
+    alt: 'Hand-drawn learning map for high performance computing and systems profiling, branching from operating systems into distributed systems, computer architecture, concurrency, compilers, and digital design.',
+  },
   'ai-inference': {
     src: '/images/blog/ai-inference-cover.png',
     alt: 'Annotated overview of AI inference, including tokenization, embeddings, RoPE, attention, and attention scores.',
